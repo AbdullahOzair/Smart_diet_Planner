@@ -1,0 +1,515 @@
+/*
+============================================================================
+Smart Diet & Lifestyle Planner - Custom Styles
+Health-inspired design with soft, calming color palette
+============================================================================
+*/
+
+/* ============================================================================
+   ROOT VARIABLES - Color Palette
+   ============================================================================ */
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #2196F3;
+    --success-color: #66BB6A;
+    --warning-color: #FFA726;
+    --danger-color: #EF5350;
+    --info-color: #26C6DA;
+    --light-bg: #F5F7FA;
+    --dark-text: #2C3E50;
+    --muted-text: #7F8C8D;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================================================
+   GLOBAL STYLES
+   ============================================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-bg);
+    color: var(--dark-text);
+    line-height: 1.6;
+}
+
+/* ============================================================================
+   LOGIN PAGE STYLES
+   ============================================================================ */
+.login-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.login-icon {
+    font-size: 4rem;
+    color: #667eea;
+}
+
+.login-icon i {
+    animation: pulse 2s infinite;
+}
+
+.demo-credentials {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.demo-badge {
+    background-color: white;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+/* ============================================================================
+   DASHBOARD PAGE STYLES
+   ============================================================================ */
+.dashboard-page {
+    background-color: var(--light-bg);
+}
+
+/* Navbar */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+/* Sidebar */
+.sidebar {
+    min-height: calc(100vh - 56px);
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar .nav-link {
+    color: var(--dark-text);
+    padding: 12px 20px;
+    margin: 5px 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.sidebar .nav-link i {
+    font-size: 1.1rem;
+}
+
+/* ============================================================================
+   STAT CARDS
+   ============================================================================ */
+.stat-card {
+    padding: 25px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
+
+.stat-icon {
+    font-size: 3rem;
+    opacity: 0.3;
+}
+
+.stat-details h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.stat-details p {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* ============================================================================
+   CARDS
+   ============================================================================ */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    animation: fadeIn 0.6s ease-out;
+}
+
+.card:hover {
+    box-shadow: var(--hover-shadow);
+}
+
+.card-header {
+    border-bottom: none;
+    border-radius: 15px 15px 0 0 !important;
+    font-weight: 600;
+}
+
+.welcome-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.welcome-card .card-title {
+    color: white;
+}
+
+.welcome-card .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* ============================================================================
+   TABLES
+   ============================================================================ */
+.table-responsive {
+    border-radius: 10px;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: var(--muted-text);
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(76, 175, 80, 0.05);
+    transform: scale(1.01);
+}
+
+/* ============================================================================
+   FORMS
+   ============================================================================ */
+.form-label {
+    font-weight: 600;
+    color: var(--dark-text);
+    margin-bottom: 8px;
+}
+
+.form-control,
+.form-select {
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+}
+
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
+.btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #66BB6A 0%, #4CAF50 100%);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #FFA726 0%, #FF9800 100%);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #EF5350 0%, #E53935 100%);
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #26C6DA 0%, #00BCD4 100%);
+}
+
+/* ============================================================================
+   BADGES
+   ============================================================================ */
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+/* ============================================================================
+   GOAL CARDS
+   ============================================================================ */
+.goal-card {
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.goal-card:hover {
+    border-left-width: 8px;
+    transform: translateX(5px);
+}
+
+.progress {
+    height: 10px;
+    border-radius: 10px;
+    background-color: #e0e0e0;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+/* ============================================================================
+   LOG ITEMS
+   ============================================================================ */
+.log-item,
+.meal-log-item,
+.activity-log-item,
+.meal-item,
+.activity-item {
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.log-item:hover,
+.meal-log-item:hover,
+.activity-log-item:hover,
+.meal-item:hover,
+.activity-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+    box-shadow: var(--card-shadow);
+}
+
+/* ============================================================================
+   SUGGESTION CARDS
+   ============================================================================ */
+.suggestion-card {
+    border-left: 4px solid var(--warning-color);
+    transition: all 0.3s ease;
+}
+
+.suggestion-card:hover {
+    border-left-width: 8px;
+    box-shadow: var(--hover-shadow);
+}
+
+.suggestion-icon {
+    font-size: 2.5rem;
+}
+
+/* ============================================================================
+   ALERTS
+   ============================================================================ */
+.alert {
+    border: none;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+@media (max-width: 768px) {
+    .sidebar {
+        min-height: auto;
+    }
+    
+    .stat-card {
+        margin-bottom: 15px;
+    }
+    
+    .stat-details h3 {
+        font-size: 2rem;
+    }
+    
+    .stat-icon {
+        font-size: 2rem;
+    }
+}
+
+/* ============================================================================
+   SCROLLBAR CUSTOMIZATION
+   ============================================================================ */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #45a049;
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+.text-primary-custom {
+    color: var(--primary-color);
+}
+
+.bg-primary-custom {
+    background-color: var(--primary-color);
+}
+
+.shadow-custom {
+    box-shadow: var(--card-shadow);
+}
+
+.shadow-hover-custom:hover {
+    box-shadow: var(--hover-shadow);
+}
+
+/* ============================================================================
+   PAGE HEADER
+   ============================================================================ */
+.border-bottom {
+    border-bottom: 3px solid var(--primary-color) !important;
+}
+
+main h1, main h2 {
+    color: var(--dark-text);
+    font-weight: 700;
+}
+
+/* ============================================================================
+   DROPDOWN MENU
+   ============================================================================ */
+.dropdown-menu {
+    border: none;
+    box-shadow: var(--card-shadow);
+    border-radius: 10px;
+}
+
+.dropdown-item {
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+/* ============================================================================
+   LOADING STATES
+   ============================================================================ */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+@media print {
+    .sidebar,
+    .navbar,
+    .btn {
+        display: none;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}

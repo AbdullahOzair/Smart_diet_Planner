@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Smart Diet Planner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: var(--charcoal-900); box-shadow: var(--shadow-lg); border-bottom: 3px solid var(--accent);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('user_dashboard') }}" style="font-weight: 800; font-size: 1.375rem;">
+                <i class="bi bi-heart-pulse-fill me-2" style="color: var(--accent);"></i>
+                Smart Diet Planner
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" style="background: var(--charcoal-800); padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">
+                            <i class="bi bi-person-circle me-1" style="color: var(--accent);"></i>
+                            {{ session.first_name }} {{ session.last_name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('user_profile') }}">
+                                <i class="bi bi-person me-2"></i>Profile
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                <i class="bi bi-box-arrow-right me-2"></i>Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container-fluid">
+        <div class="row">
+            
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar" style="background: var(--charcoal-900); min-height: calc(100vh - 60px); padding: 1.5rem 0;">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if not view %}active{% endif %}" href="{{ url_for('user_dashboard') }}" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; {% if not view %}background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: #fff; box-shadow: var(--shadow-accent);{% endif %}">
+                                <i class="bi bi-speedometer2" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if view == 'profile' %}active{% endif %}" href="{{ url_for('user_profile') }}" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; {% if view == 'profile' %}background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: #fff; box-shadow: var(--shadow-accent);{% endif %}">
+                                <i class="bi bi-person" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                My Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if view == 'goals' %}active{% endif %}" href="{{ url_for('user_goals') }}" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; {% if view == 'goals' %}background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: #fff; box-shadow: var(--shadow-accent);{% endif %}">
+                                <i class="bi bi-bullseye" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                My Goals
+                            </a>
+                        </li>
+                        <hr style="border-color: var(--charcoal-700); margin: 1rem 0.75rem;">
+                        <li class="nav-item small ps-3" style="color: var(--charcoal-500); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.688rem; padding: 0 0.75rem; margin-bottom: 0.5rem;">LOGS</li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if view == 'add_daily_log' %}active{% endif %}" href="{{ url_for('user_add_daily_log') }}" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; {% if view == 'add_daily_log' %}background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: #fff; box-shadow: var(--shadow-accent);{% endif %}">
+                                <i class="bi bi-calendar-plus" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                Add Daily Log
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if view == 'add_meal_log' %}active{% endif %}" href="{{ url_for('user_add_meal_log') }}" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; {% if view == 'add_meal_log' %}background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: #fff; box-shadow: var(--shadow-accent);{% endif %}">
+                                <i class="bi bi-egg-fried" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                Add Meal Log
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if view == 'add_activity_log' %}active{% endif %}" href="{{ url_for('user_add_activity_log') }}" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; {% if view == 'add_activity_log' %}background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: #fff; box-shadow: var(--shadow-accent);{% endif %}">
+                                <i class="bi bi-activity" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                Add Activity Log
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if view == 'add_mood_log' %}active{% endif %}" href="{{ url_for('user_add_mood_log') }}" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; {% if view == 'add_mood_log' %}background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: #fff; box-shadow: var(--shadow-accent);{% endif %}">
+                                <i class="bi bi-emoji-smile" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                Add Mood Log
+                            </a>
+                        </li>
+                        <hr style="border-color: var(--charcoal-700); margin: 1rem 0.75rem;">
+                        <li class="nav-item small ps-3" style="color: var(--charcoal-500); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.688rem; padding: 0 0.75rem; margin-bottom: 0.5rem;">AI & REPORTS</li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if view == 'suggestions' %}active{% endif %}" href="{{ url_for('user_suggestions') }}" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; {% if view == 'suggestions' %}background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: #fff; box-shadow: var(--shadow-accent);{% endif %}">
+                                <i class="bi bi-lightbulb" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                AI Suggestions
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if view == 'reports' %}active{% endif %}" href="{{ url_for('user_reports') }}" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; {% if view == 'reports' %}background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: #fff; box-shadow: var(--shadow-accent);{% endif %}">
+                                <i class="bi bi-file-earmark-bar-graph" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                My Reports
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" style="background: var(--stone-100); min-height: calc(100vh - 60px); padding: 1.5rem 2rem !important;">
+                
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="mt-3">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                <!-- Dashboard Overview -->
+                {% if not view %}
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3" style="padding-top: 0; border-bottom: 1px solid var(--border);">
+                    <h1 style="font-size: 1.5rem; color: var(--charcoal-900); margin-bottom: 0.25rem;">My Dashboard</h1>
+                </div>
+                
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card" style="position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--info); border-radius: 10px 0 0 10px;"></div>
+                            <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                                <div class="stat-icon" style="background: var(--info-bg); color: var(--info); width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                    <i class="bi bi-calendar-check-fill"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <h3 style="font-size: 2rem; font-weight: 800; color: var(--charcoal-900); margin-bottom: 0.25rem;">{{ stats.total_logs }}</h3>
+                                    <p style="color: var(--charcoal-500); font-size: 0.813rem; font-weight: 500; margin: 0;">Daily Logs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card" style="position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--warning); border-radius: 10px 0 0 10px;"></div>
+                            <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                                <div class="stat-icon" style="background: var(--warning-bg); color: var(--warning); width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                    <i class="bi bi-egg-fried"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <h3 style="font-size: 2rem; font-weight: 800; color: var(--charcoal-900); margin-bottom: 0.25rem;">{{ stats.total_meals }}</h3>
+                                    <p style="color: var(--charcoal-500); font-size: 0.813rem; font-weight: 500; margin: 0;">Meal Logs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card" style="position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); border-radius: 10px 0 0 10px;"></div>
+                            <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                                <div class="stat-icon" style="background: var(--accent-light); color: var(--accent); width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                    <i class="bi bi-activity"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <h3 style="font-size: 2rem; font-weight: 800; color: var(--charcoal-900); margin-bottom: 0.25rem;">{{ stats.total_activities }}</h3>
+                                    <p style="color: var(--charcoal-500); font-size: 0.813rem; font-weight: 500; margin: 0;">Activity Logs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card" style="position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--success); border-radius: 10px 0 0 10px;"></div>
+                            <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                                <div class="stat-icon" style="background: var(--success-bg); color: var(--success); width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                    <i class="bi bi-bullseye"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <h3 style="font-size: 2rem; font-weight: 800; color: var(--charcoal-900); margin-bottom: 0.25rem;">{{ stats.active_goals }}</h3>
+                                    <p style="color: var(--charcoal-500); font-size: 0.813rem; font-weight: 500; margin: 0;">Active Goals</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card" style="background: linear-gradient(135deg, var(--stone-50) 0%, var(--stone-100) 100%); box-shadow: var(--shadow-md), inset 0 1px 2px rgba(255, 255, 255, 0.8);">
+                            <div class="card-body">
+                                <h5 class="card-title" style="color: var(--charcoal-900); font-weight: 700; margin-bottom: 1rem;">
+                                    <i class="bi bi-hand-thumbs-up-fill me-2" style="color: var(--success);"></i>
+                                    Welcome back, {{ session.first_name }}!
+                                </h5>
+                                <p style="color: var(--charcoal-600); margin-bottom: 1.5rem;">
+                                    Track your daily nutrition, activities, and progress toward your health goals.
+                                    Start by adding your daily log or meal log.
+                                </p>
+                                <div class="mt-3">
+                                    <a href="{{ url_for('user_add_daily_log') }}" class="btn btn-primary me-2">
+                                        <i class="bi bi-calendar-plus me-1"></i> Add Daily Log
+                                    </a>
+                                    <a href="{{ url_for('user_add_meal_log') }}" class="btn btn-success">
+                                        <i class="bi bi-egg-fried me-1"></i> Add Meal
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Profile View -->
+                {% if view == 'profile' %}
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3" style="padding-top: 0; border-bottom: 1px solid var(--border);">
+                    <h1 style="font-size: 1.5rem; color: var(--charcoal-900); margin-bottom: 0.25rem;">My Profile</h1>
+                </div>
+                
+                {% if profile %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card" style="box-shadow: var(--shadow-md), inset 0 1px 1px rgba(255, 255, 255, 0.8);">
+                            <div class="card-header" style="background: var(--charcoal-800); color: #FFFFFF; border-radius: 10px 10px 0 0;">
+                                <h5 style="margin: 0; font-weight: 700;"><i class="bi bi-person-fill me-2"></i>Personal Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <th>Username:</th>
+                                        <td>{{ profile[1] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Email:</th>
+                                        <td>{{ profile[2] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Full Name:</th>
+                                        <td>{{ profile[3] }} {{ profile[4] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Date of Birth:</th>
+                                        <td>{{ profile[5] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Gender:</th>
+                                        <td>{{ profile[6] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Member Since:</th>
+                                        <td>{{ profile[12] }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h5><i class="bi bi-heart-pulse-fill me-2"></i>Health Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <th>Weight:</th>
+                                        <td>{{ profile[7] }} kg</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Height:</th>
+                                        <td>{{ profile[8] }} cm</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Activity Level:</th>
+                                        <td><span class="badge bg-success">{{ profile[9] }}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Dietary Preference:</th>
+                                        <td>{{ profile[10] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Health Condition:</th>
+                                        <td>{{ profile[11] }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+                
+                <!-- Goals View -->
+                {% if view == 'goals' %}
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">My Goals</h1>
+                    <a href="{{ url_for('user_add_goal') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Create New Goal
+                    </a>
+                </div>
+                
+                <div class="row">
+                    {% if goals %}
+                        {% for goal in goals %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card goal-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-bullseye text-success me-2"></i>
+                                            {{ goal[1] }}
+                                        </h5>
+                                        {% if goal[4] == 'Active' %}
+                                            <span class="badge bg-success">{{ goal[4] }}</span>
+                                        {% elif goal[4] == 'Completed' %}
+                                            <span class="badge bg-info">{{ goal[4] }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ goal[4] }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Target Value</small>
+                                            <p class="fw-bold">{{ goal[2] }}</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Current Value</small>
+                                            <p class="fw-bold">{{ goal[3] }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Start Date</small>
+                                            <p>{{ goal[5] }}</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Target Date</small>
+                                            <p>{{ goal[6] }}</p>
+                                        </div>
+                                    </div>
+                                    {% if goal[2] and goal[3] %}
+                                    <div class="progress">
+                                        {% set progress = (goal[3] / goal[2] * 100) | int %}
+                                        <div class="progress-bar bg-success" style="width: {{ progress }}%">{{ progress }}%</div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                No goals set yet. <a href="{{ url_for('user_add_goal') }}" class="alert-link">Create your first goal</a> to start tracking your health journey!
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <!-- Add Goal View -->
+                {% if view == 'add_goal' %}
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Create New Goal</h1>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card" style="box-shadow: var(--shadow-lg); border: none;">
+                            <div class="card-header" style="background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: white;">
+                                <h5 class="mb-0"><i class="bi bi-bullseye me-2"></i>Goal Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="{{ url_for('user_add_goal') }}">
+                                    <div class="mb-3">
+                                        <label for="goal_type" class="form-label fw-bold">Goal Type</label>
+                                        <select class="form-select" id="goal_type" name="goal_type" required>
+                                            <option value="">Select goal type...</option>
+                                            <option value="Weight Loss">Weight Loss</option>
+                                            <option value="Weight Gain">Weight Gain</option>
+                                            <option value="Maintain Weight">Maintain Weight</option>
+                                            <option value="Muscle Gain">Muscle Gain</option>
+                                            <option value="Fitness">General Fitness</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="current_value" class="form-label fw-bold">Current Value (kg/lbs)</label>
+                                            <input type="number" class="form-control" id="current_value" name="current_value" step="0.1" required>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="target_value" class="form-label fw-bold">Target Value (kg/lbs)</label>
+                                            <input type="number" class="form-control" id="target_value" name="target_value" step="0.1" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="target_date" class="form-label fw-bold">Target Date</label>
+                                        <input type="date" class="form-control" id="target_date" name="target_date" required>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-circle me-2"></i>Create Goal
+                                        </button>
+                                        <a href="{{ url_for('user_goals') }}" class="btn btn-secondary">
+                                            <i class="bi bi-x-circle me-2"></i>Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card" style="box-shadow: var(--shadow-md); border-left: 4px solid var(--accent);">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="bi bi-lightbulb me-2" style="color: var(--accent);"></i>Tips</h5>
+                                <ul class="mb-0">
+                                    <li>Set realistic and achievable goals</li>
+                                    <li>Track your progress regularly</li>
+                                    <li>Stay consistent with your diet and exercise</li>
+                                    <li>Consult with healthcare professionals for personalized advice</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Add Daily Log View -->
+                {% if view == 'add_daily_log' %}
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Add Daily Log</h1>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5><i class="bi bi-calendar-plus me-2"></i>Daily Log Form</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="{{ url_for('user_add_daily_log') }}">
+                                    <div class="mb-3">
+                                        <label class="form-label">Log Date</label>
+                                        <input type="date" class="form-control" name="log_date" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Total Calories Consumed</label>
+                                        <input type="number" class="form-control" name="calories_consumed" 
+                                            step="0.01" placeholder="e.g., 2000" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Total Calories Burned</label>
+                                        <input type="number" class="form-control" name="calories_burned" 
+                                            step="0.01" placeholder="e.g., 500" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Water Intake (Liters)</label>
+                                        <input type="number" class="form-control" name="water_intake" 
+                                            step="0.1" placeholder="e.g., 2.5" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Sleep Hours</label>
+                                        <input type="number" class="form-control" name="sleep_hours" 
+                                            step="0.1" placeholder="e.g., 8" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Current Weight (kg)</label>
+                                        <input type="number" class="form-control" name="weight" 
+                                            step="0.1" placeholder="e.g., 70" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-save me-2"></i>Save Daily Log
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h5><i class="bi bi-clock-history me-2"></i>Recent Logs</h5>
+                            </div>
+                            <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                                {% if daily_logs %}
+                                    {% for log in daily_logs %}
+                                    <div class="log-item mb-3 p-3 border rounded">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>{{ log[1] }}</strong>
+                                            <span class="badge bg-primary">ID: {{ log[0] }}</span>
+                                        </div>
+                                        <hr class="my-2">
+                                        <div class="row small">
+                                            <div class="col-6">
+                                                <i class="bi bi-fire text-warning"></i> Consumed: <strong>{{ log[2] }}</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <i class="bi bi-lightning text-danger"></i> Burned: <strong>{{ log[3] }}</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <i class="bi bi-droplet text-info"></i> Water: {{ log[4] }}L
+                                            </div>
+                                            <div class="col-6">
+                                                <i class="bi bi-moon text-primary"></i> Sleep: {{ log[5] }}h
+                                            </div>
+                                            <div class="col-6">
+                                                <i class="bi bi-speedometer text-success"></i> Weight: {{ log[6] }}kg
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No daily logs yet</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Add Meal Log View -->
+                {% if view == 'add_meal_log' %}
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Add Meal Log</h1>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-warning text-white">
+                                <h5><i class="bi bi-egg-fried me-2"></i>Meal Log Form</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="{{ url_for('user_add_meal_log') }}">
+                                    <div class="mb-3">
+                                        <label class="form-label">Select Meal</label>
+                                        <select class="form-select" name="meal_id" required>
+                                            <option value="">Choose a meal...</option>
+                                            {% if meals %}
+                                                {% for meal in meals %}
+                                                <option value="{{ meal[0] }}">
+                                                    {{ meal[1] }} ({{ meal[2] }}) - {{ meal[3] }} cal
+                                                </option>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Meal Time</label>
+                                        <input type="datetime-local" class="form-control" name="meal_time" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Quantity (servings)</label>
+                                        <input type="number" class="form-control" name="quantity" 
+                                            step="0.1" value="1" min="0.1" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-warning w-100 text-white">
+                                        <i class="bi bi-save me-2"></i>Save Meal Log
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5><i class="bi bi-clock-history me-2"></i>Recent Meal Logs</h5>
+                            </div>
+                            <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                                {% if meal_logs %}
+                                    {% for log in meal_logs %}
+                                    <div class="meal-log-item mb-2 p-2 border rounded">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>{{ log[1] }}</strong>
+                                            <span class="badge bg-warning">{{ log[4] }} cal</span>
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock"></i> {{ log[2] }} | 
+                                            <i class="bi bi-calculator"></i> Qty: {{ log[3] }}
+                                        </small>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No meal logs yet</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Add Activity Log View -->
+                {% if view == 'add_activity_log' %}
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Add Activity Log</h1>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-danger text-white">
+                                <h5><i class="bi bi-activity me-2"></i>Activity Log Form</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="{{ url_for('user_add_activity_log') }}">
+                                    <div class="mb-3">
+                                        <label class="form-label">Select Activity</label>
+                                        <select class="form-select" name="activity_id" required>
+                                            <option value="">Choose an activity...</option>
+                                            {% if activities %}
+                                                {% for activity in activities %}
+                                                <option value="{{ activity[0] }}">
+                                                    {{ activity[1] }} ({{ activity[2] }}) - {{ activity[3] }} cal/hr
+                                                </option>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Activity Time</label>
+                                        <input type="datetime-local" class="form-control" name="activity_time" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Duration (minutes)</label>
+                                        <input type="number" class="form-control" name="duration" 
+                                            step="1" min="1" placeholder="e.g., 30" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger w-100">
+                                        <i class="bi bi-save me-2"></i>Save Activity Log
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5><i class="bi bi-clock-history me-2"></i>Recent Activity Logs</h5>
+                            </div>
+                            <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                                {% if activity_logs %}
+                                    {% for log in activity_logs %}
+                                    <div class="activity-log-item mb-2 p-2 border rounded">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>{{ log[1] }}</strong>
+                                            <span class="badge bg-danger">{{ log[4] }} cal</span>
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock"></i> {{ log[2] }} | 
+                                            <i class="bi bi-stopwatch"></i> {{ log[3] }} min
+                                        </small>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No activity logs yet</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Add Mood Log View -->
+                {% if view == 'add_mood_log' %}
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Add Mood Log</h1>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-warning text-dark">
+                                <h5><i class="bi bi-emoji-smile me-2"></i>Log Your Mood & Energy</h5>
+                            </div>
+                            <div class="card-body">
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                    {% endfor %}
+                                {% endif %}
+                                {% endwith %}
+                                
+                                <form method="POST" action="{{ url_for('user_add_mood_log') }}">
+                                    <div class="mb-3">
+                                        <label class="form-label">Date</label>
+                                        <input type="date" class="form-control" name="log_date" 
+                                            value="{{ today }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Mood Rating (1-5)</label>
+                                        <select class="form-select" name="mood_rating" required>
+                                            <option value="">Select your mood...</option>
+                                            <option value="5">😄 Very Happy (5)</option>
+                                            <option value="4">😊 Happy (4)</option>
+                                            <option value="3">😐 Neutral (3)</option>
+                                            <option value="2">😔 Sad (2)</option>
+                                            <option value="1">😢 Very Sad (1)</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Stress Level</label>
+                                        <input type="range" class="form-range custom-range-orange" name="stress_level" 
+                                            min="1" max="10" value="5" 
+                                            oninput="this.nextElementSibling.textContent = ['Low', 'Low', 'Low', 'Moderate', 'Moderate', 'Moderate', 'Moderate', 'High', 'High', 'High'][this.value-1]" required>
+                                        <div class="text-center"><strong>Moderate</strong></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Energy Level</label>
+                                        <input type="range" class="form-range custom-range-orange" name="energy_level" 
+                                            min="1" max="10" value="5" 
+                                            oninput="this.nextElementSibling.textContent = ['Low', 'Low', 'Low', 'Moderate', 'Moderate', 'Moderate', 'Moderate', 'High', 'High', 'High'][this.value-1]" required>
+                                        <div class="text-center"><strong>Moderate</strong></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Notes (Optional)</label>
+                                        <textarea class="form-control" name="notes" rows="3" 
+                                            placeholder="Any additional notes about your day..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-warning w-100">
+                                        <i class="bi bi-save me-2"></i>Save Mood Log
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5><i class="bi bi-clock-history me-2"></i>Recent Mood Logs</h5>
+                            </div>
+                            <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                                {% if mood_logs %}
+                                    {% for log in mood_logs %}
+                                    <div class="mood-log-item mb-3 p-3 border rounded">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="mb-0">{{ log[1] }}</h6>
+                                            <span class="badge bg-warning text-dark">{{ log[2] }}</span>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">
+                                                <i class="bi bi-bar-chart"></i> Stress: <strong>{{ log[3] }}/10</strong> | 
+                                                <i class="bi bi-lightning"></i> Energy: <strong>{{ log[4] }}/10</strong>
+                                            </small>
+                                        </div>
+                                        {% if log[5] %}
+                                        <p class="mb-0 small"><em>{{ log[5] }}</em></p>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No mood logs yet</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Suggestions View -->
+                {% if view == 'suggestions' %}
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2"><i class="bi bi-lightbulb me-2"></i>AI Suggestions</h1>
+                </div>
+                
+                <div class="row">
+                    {% if suggestions %}
+                        {% for suggestion in suggestions %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card suggestion-card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="suggestion-icon me-3">
+                                            <i class="bi bi-lightbulb-fill text-warning fs-3"></i>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-info">{{ suggestion[1] }}</span>
+                                            <small class="text-muted ms-2">{{ suggestion[3] }}</small>
+                                        </div>
+                                    </div>
+                                    <p class="mb-0">{{ suggestion[2] }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                No suggestions available yet. Keep logging your daily activities to receive personalized suggestions!
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <!-- Reports View -->
+                {% if view == 'reports' %}
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2"><i class="bi bi-file-earmark-bar-graph me-2"></i>My Health Reports</h1>
+                </div>
+                
+                {% if reports %}
+                <div class="row">
+                    {% for report in reports %}
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <span class="badge bg-primary me-2">{{ report[1] }}</span>
+                                    {{ report[2] }} to {{ report[3] }}
+                                </h5>
+                                <small class="text-muted">Generated: {{ report[10] }}</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-3">
+                                        <div class="text-center p-3 bg-light rounded">
+                                            <h4 class="text-success mb-0">{{ report[4] }}</h4>
+                                            <small class="text-muted">Calories Consumed</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-center p-3 bg-light rounded">
+                                            <h4 class="text-danger mb-0">{{ report[5] }}</h4>
+                                            <small class="text-muted">Calories Burned</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-center p-3 bg-light rounded">
+                                            <h4 class="text-primary mb-0">{{ report[6] }} kg</h4>
+                                            <small class="text-muted">Average Weight</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-center p-3 bg-light rounded">
+                                            <h4 class="{% if report[7] and report[7] > 0 %}text-success{% elif report[7] and report[7] < 0 %}text-danger{% else %}text-muted{% endif %} mb-0">
+                                                {% if report[7] and report[7] > 0 %}+{% endif %}{{ report[7] if report[7] else 0 }} kg
+                                            </h4>
+                                            <small class="text-muted">Weight Change</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h6><i class="bi bi-card-text me-2"></i>Summary:</h6>
+                                    <p class="mb-0">{{ report[9] }}</p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success">{{ report[8] }} Goals Achieved</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    No reports available yet. Reports will be generated based on your logged data over time.
+                </div>
+                {% endif %}
+                {% endif %}
+                
+            </main>
+        </div>
+    </div>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <style>
+        /* Sidebar Navigation Hover Effects */
+        .sidebar .nav-link:not(.active):hover {
+            background: var(--charcoal-800) !important;
+            color: var(--stone-100) !important;
+        }
+        
+        /* Card 3D Effects */
+        .card {
+            transition: all 0.2s ease;
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-lg), inset 0 1px 2px rgba(255, 255, 255, 1) !important;
+        }
+        
+        /* Stat Card Hover */
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg) !important;
+            border-color: var(--accent) !important;
+        }
+        
+        /* Button 3D Press Effect */
+        .btn:active {
+            transform: translateY(1px) !important;
+            box-shadow: 0 1px 2px rgba(28, 25, 23, 0.2) !important;
+        }
+        
+        /* Table Row Hover */
+        .table tbody tr:hover {
+            background: var(--stone-100) !important;
+            box-shadow: 0 2px 4px rgba(28, 25, 23, 0.04);
+        }
+        
+        /* Input Focus 3D Effect */
+        .form-control:focus,
+        .form-select:focus {
+            box-shadow: 0 0 0 3px var(--accent-glow), 
+                        inset 0 1px 2px rgba(28, 25, 23, 0.05) !important;
+        }
+        
+        /* Dropdown Menu */
+        .dropdown-menu {
+            background: var(--stone-50);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            padding: 0.5rem;
+        }
+        
+        .dropdown-item {
+            padding: 0.625rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: var(--charcoal-700);
+            transition: all 0.15s;
+        }
+        
+        .dropdown-item:hover {
+            background: var(--stone-100);
+            color: var(--charcoal-900);
+        }
+        
+        /* Badge 3D Effect */
+        .badge {
+            box-shadow: 0 1px 3px rgba(28, 25, 23, 0.1),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Alert 3D Effect */
+        .alert {
+            box-shadow: 0 2px 6px rgba(28, 25, 23, 0.06),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+        }
+    </style>
+    
+</body>
+</html>

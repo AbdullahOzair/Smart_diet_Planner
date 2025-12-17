@@ -1,0 +1,14 @@
+# Smart Diet & Lifestyle Planner - Python Dependencies
+
+# Web Framework
+Flask==3.0.0
+Werkzeug==3.0.1
+
+# Database Driver
+oracledb==2.0.0
+
+# Additional Dependencies (included with Flask)
+# Jinja2 - Templating engine
+# click - CLI creation
+# itsdangerous - Security utilities
+# MarkupSafe - String handling

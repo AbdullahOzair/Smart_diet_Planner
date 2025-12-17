@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Smart Diet & Lifestyle Planner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card fade-in" style="max-width: 680px;">
+            <div class="login-header">
+                <div class="login-icon">
+                    <i class="bi bi-person-plus-fill"></i>
+                </div>
+                <h2>Create Account</h2>
+                <p>Join Smart Diet Planner Today</p>
+            </div>
+            
+            <div class="login-body">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        <i class="bi bi-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
+                
+                <form method="POST" action="{{ url_for('register') }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="username" class="form-label">
+                                <i class="bi bi-person me-2"></i>Username *
+                            </label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">
+                                <i class="bi bi-envelope me-2"></i>Email *
+                            </label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="password" class="form-label">
+                                <i class="bi bi-lock me-2"></i>Password *
+                            </label>
+                            <div class="password-input-wrapper">
+                                <input type="password" class="form-control" id="password" name="password" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('password', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="confirm_password" class="form-label">
+                                <i class="bi bi-lock-fill me-2"></i>Confirm Password *
+                            </label>
+                            <div class="password-input-wrapper">
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('confirm_password', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                            
+                            <div class="row">
+                                <!-- First Name -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="first_name" class="form-label">First Name *</label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                                </div>
+                                
+                                <!-- Last Name -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="last_name" class="form-label">Last Name *</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <!-- Date of Birth -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="dob" class="form-label">Date of Birth *</label>
+                                    <input type="date" class="form-control" id="dob" name="dob" required>
+                                </div>
+                                
+                                <!-- Gender -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="gender" class="form-label">Gender *</label>
+                                    <select class="form-select" id="gender" name="gender" required>
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <!-- Weight -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="weight" class="form-label">Weight (kg) *</label>
+                                    <input type="number" class="form-control" id="weight" name="weight" step="0.1" required>
+                                </div>
+                                
+                                <!-- Height -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="height" class="form-label">Height (cm) *</label>
+                                    <input type="number" class="form-control" id="height" name="height" step="0.1" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <!-- Activity Level -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="activity_level" class="form-label">Activity Level *</label>
+                                    <select class="form-select" id="activity_level" name="activity_level" required>
+                                        <option value="">Select Level</option>
+                                        <option value="Sedentary">Sedentary</option>
+                                        <option value="Light">Light</option>
+                                        <option value="Moderate">Moderate</option>
+                                        <option value="Active">Active</option>
+                                        <option value="Very Active">Very Active</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Dietary Preference -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="dietary_preference" class="form-label">Dietary Preference</label>
+                                    <input type="text" class="form-control" id="dietary_preference" name="dietary_preference" placeholder="e.g., Vegetarian">
+                                </div>
+                            </div>
+                            
+                            <!-- Health Condition -->
+                            <div class="mb-3">
+                                <label for="health_condition" class="form-label">Health Condition</label>
+                                <input type="text" class="form-control" id="health_condition" name="health_condition" placeholder="Any health conditions (optional)">
+                            </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 mb-3">
+                        <i class="bi bi-person-plus me-2"></i>Create Account
+                    </button>
+                    
+                    <div class="text-center">
+                        <p class="text-muted mb-0">Already have an account? 
+                            <a href="{{ url_for('login') }}" style="color: var(--accent); font-weight: 600;">Login here</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+    </script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.6s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .password-input-wrapper {
+            position: relative;
+        }
+        
+        .password-input-wrapper .form-control {
+            padding-right: 3rem;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--charcoal-500);
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        
+        .password-toggle:hover {
+            color: var(--accent);
+        }
+        
+        .password-toggle i {
+            font-size: 1rem;
+        }
+    </style>
+</body>
+</html>

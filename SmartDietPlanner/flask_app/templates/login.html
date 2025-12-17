@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Smart Diet & Lifestyle Planner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card fade-in">
+            <div class="login-header">
+                <div class="login-icon">
+                    <i class="bi bi-heart-pulse"></i>
+                </div>
+                <h2>Welcome Back</h2>
+                <p>Your health journey continues here</p>
+            </div>
+            
+            <div class="login-body">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <i class="bi bi-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
+                
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="bi bi-person-circle me-2"></i>Username
+                        </label>
+                        <input type="text" class="form-control" name="username" placeholder="Enter your username" required autofocus>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="bi bi-lock-fill me-2"></i>Password
+                        </label>
+                        <div class="password-input-wrapper">
+                            <input type="password" class="form-control" id="loginPassword" name="password" placeholder="Enter your password" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 mb-3">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                    </button>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <p class="text-muted mb-3">Don't have an account?</p>
+                    <a href="{{ url_for('register') }}" class="btn btn-success w-100">
+                        <i class="bi bi-person-plus me-2"></i>Create New Account
+                    </a>
+                </div>
+                
+                <hr style="margin: 2rem 0; border-color: var(--border);">
+                
+                <div class="demo-credentials">
+                    <h6>
+                        <i class="bi bi-info-circle me-2"></i>Demo Credentials
+                    </h6>
+                    
+                    <div class="credential-box">
+                        <div class="credential-title">
+                            <i class="bi bi-shield-check me-2"></i>Admin Accounts
+                        </div>
+                        <div class="credential-details">
+                            <strong>Username:</strong> zainab_moazzam or abdullah_ozair<br>
+                            <strong>Password:</strong> admin
+                        </div>
+                    </div>
+                    
+                    <div class="credential-box">
+                        <div class="credential-title">
+                            <i class="bi bi-person-circle me-2"></i>User Account
+                        </div>
+                        <div class="credential-details">
+                            <strong>Username:</strong> john_doe<br>
+                            <strong>Password:</strong> admin
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+    </script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.6s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Password Toggle Eye Icon */
+        .password-input-wrapper {
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--charcoal-500);
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        
+        .password-toggle:hover {
+            color: var(--accent);
+        }
+        
+        .password-toggle i {
+            font-size: 1rem;
+        }
+        
+        /* Demo Credentials Box - 3D Effect */
+        .demo-credentials {
+            background: linear-gradient(135deg, var(--stone-100) 0%, var(--stone-50) 100%);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(28, 25, 23, 0.08), 
+                        0 2px 4px rgba(28, 25, 23, 0.04),
+                        inset 0 -1px 2px rgba(255, 255, 255, 0.8),
+                        inset 0 1px 2px rgba(28, 25, 23, 0.05);
+        }
+        
+        .demo-credentials h6 {
+            color: var(--charcoal-800);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .credential-box {
+            background: var(--stone-50);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 6px rgba(28, 25, 23, 0.06),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.9);
+            transition: all 0.2s;
+        }
+        
+        .credential-box:last-child {
+            margin-bottom: 0;
+        }
+        
+        .credential-box:hover {
+            box-shadow: 0 4px 10px rgba(28, 25, 23, 0.1),
+                        inset 0 1px 2px rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+        
+        .credential-title {
+            font-weight: 600;
+            color: var(--charcoal-800);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .credential-title i {
+            color: var(--accent);
+        }
+        
+        .credential-details {
+            font-size: 0.813rem;
+            color: var(--charcoal-600);
+            line-height: 1.6;
+        }
+        
+        .credential-details strong {
+            color: var(--charcoal-700);
+            font-weight: 600;
+        }
+    </style>
+</body>
+</html>
