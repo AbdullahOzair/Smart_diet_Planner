@@ -1,0 +1,150 @@
+                {% if view == 'add_mood_log' %}
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Add Mood Log</h1>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-warning text-dark">
+                                <h5><i class="bi bi-emoji-smile me-2"></i>Log Your Mood & Energy</h5>
+                            </div>
+                            <div class="card-body">
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                    {% endfor %}
+                                {% endif %}
+                                {% endwith %}
+                                
+                                <form method="POST" action="{{ url_for('user_add_mood_log') }}">
+                                    {% if not has_daily_log %}
+                                    <div class="alert alert-warning" role="alert">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        <strong>Please create a Daily Log first!</strong><br>
+                                        <small>You need to add a daily log for today before logging mood.</small><br>
+                                        <a href="{{ url_for('user_add_daily_log') }}" class="btn btn-sm btn-warning mt-2">
+                                            <i class="bi bi-calendar-plus me-1"></i>Create Daily Log Now
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label mb-3"><b>How are you feeling?</b></label>
+        <div class="d-flex justify-content-between mb-4 text-center emoji-selector">
+            <label class="cursor-pointer" style="cursor:pointer;">
+                <input type="radio" name="mood_rating" value="5" class="d-none" required {{ 'disabled' if not has_daily_log else '' }}>
+                <div class="fs-1 emoji-btn">😄</div>
+                <small class="text-muted fw-bold d-block mt-1 pt-1">Excellent</small>
+            </label>
+            <label class="cursor-pointer" style="cursor:pointer;">
+                <input type="radio" name="mood_rating" value="4" class="d-none" {{ 'disabled' if not has_daily_log else '' }}>
+                <div class="fs-1 emoji-btn">🙂</div>
+                <small class="text-muted fw-bold d-block mt-1 pt-1">Good</small>
+            </label>
+            <label class="cursor-pointer" style="cursor:pointer;">
+                <input type="radio" name="mood_rating" value="3" class="d-none" {{ 'disabled' if not has_daily_log else '' }}>
+                <div class="fs-1 emoji-btn">😐</div>
+                <small class="text-muted fw-bold d-block mt-1 pt-1">Neutral</small>
+            </label>
+            <label class="cursor-pointer" style="cursor:pointer;">
+                <input type="radio" name="mood_rating" value="2" class="d-none" {{ 'disabled' if not has_daily_log else '' }}>
+                <div class="fs-1 emoji-btn">😔</div>
+                <small class="text-muted fw-bold d-block mt-1 pt-1">Low</small>
+            </label>
+            <label class="cursor-pointer" style="cursor:pointer;">
+                <input type="radio" name="mood_rating" value="1" class="d-none" {{ 'disabled' if not has_daily_log else '' }}>
+                <div class="fs-1 emoji-btn">😞</div>
+                <small class="text-muted fw-bold d-block mt-1 pt-1">Very Low</small>
+            </label>
+        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Stress Level</label>
+                                        <input type="range" class="form-range custom-range-orange" name="stress_level" 
+                                            min="1" max="10" value="5" 
+                                            oninput="this.nextElementSibling.textContent = ['Low', 'Low', 'Low', 'Moderate', 'Moderate', 'Moderate', 'Moderate', 'High', 'High', 'High'][this.value-1]" required>
+                                        <div class="text-center"><strong>Moderate</strong></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Energy Level</label>
+                                        <input type="range" class="form-range custom-range-orange" name="energy_level" 
+                                            min="1" max="10" value="5" 
+                                            oninput="this.nextElementSibling.textContent = ['Low', 'Low', 'Low', 'Moderate', 'Moderate', 'Moderate', 'Moderate', 'High', 'High', 'High'][this.value-1]" required>
+                                        <div class="text-center"><strong>Moderate</strong></div>
+                                    </div>
+                                    
+                                    <div class="mb-4 mt-2">
+                                        <label class="form-label mb-3"><b>What affected your mood today?</b></label>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <div class="form-check p-0 m-0">
+                                                <input class="btn-check" type="radio" name="triggers" id="triggerWork" value="Work??" {{ 'disabled' if not has_daily_log else '' }}>
+                                                <label class="btn btn-outline-secondary rounded-pill" for="triggerWork">Work ??</label>
+                                            </div>
+                                            <div class="form-check p-0 m-0">
+                                                <input class="btn-check" type="radio" name="triggers" id="triggerExercise" value="Exercise??" {{ 'disabled' if not has_daily_log else '' }}>
+                                                <label class="btn btn-outline-secondary rounded-pill" for="triggerExercise">Exercise ??</label>
+                                            </div>
+                                            <div class="form-check p-0 m-0">
+                                                <input class="btn-check" type="radio" name="triggers" id="triggerSleep" value="Sleep??" {{ 'disabled' if not has_daily_log else '' }}>
+                                                <label class="btn btn-outline-secondary rounded-pill" for="triggerSleep">Sleep ??</label>
+                                            </div>
+                                            <div class="form-check p-0 m-0">
+                                                <input class="btn-check" type="radio" name="triggers" id="triggerFood" value="Food??" {{ 'disabled' if not has_daily_log else '' }}>
+                                                <label class="btn btn-outline-secondary rounded-pill" for="triggerFood">Food ??</label>
+                                            </div>
+                                            <div class="form-check p-0 m-0">
+                                                <input class="btn-check" type="radio" name="triggers" id="triggerSocial" value="Social??" {{ 'disabled' if not has_daily_log else '' }}>
+                                                <label class="btn btn-outline-secondary rounded-pill" for="triggerSocial">Social ??</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Notes (Optional)</label>
+                                        <textarea class="form-control" name="notes" rows="3" 
+                                            placeholder="Any additional notes about your day..." {{ 'disabled' if not has_daily_log else '' }}></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-warning w-100" {{ 'disabled' if not has_daily_log else '' }}>
+                                        <i class="bi bi-save me-2"></i>Save Mood Log
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5><i class="bi bi-clock-history me-2"></i>Recent Mood Logs</h5>
+                            </div>
+                            <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                                {% if mood_logs %}
+                                    {% for log in mood_logs %}
+                                    <div class="mood-log-item mb-3 p-3 border rounded border-start border-4 border-warning shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0">{{ log[1][:10] }}</h6>
+        <span class="badge bg-warning text-dark px-2 py-1 fs-6">
+            {% if log[2] == 5 %}😄 Excellent{% elif log[2] == 4 %}🙂 Good{% elif log[2] == 3 %}😐 Neutral{% elif log[2] == 2 %}😔 Low{% else %}😞 Very Low{% endif %}
+        </span>
+    </div>
+    <div class="mb-2 d-flex flex-wrap gap-2">
+        <span class="badge bg-light text-dark border">⚡ Energy: {{ log[4] }}/10</span>
+        <span class="badge bg-light text-dark border">😓 Stress: {{ log[3] }}/10</span>
+        {% if log|length > 6 and log[6] %}
+        <span class="badge bg-info text-dark border"><i class="bi bi-tag-fill me-1"></i>{{ log[6] }}</span>
+        {% endif %}
+    </div>
+    {% if log[5] %}
+    <div class="p-2 bg-light rounded mt-2 border-start border-2 border-secondary small text-muted"><i class="bi bi-chat-left-text me-1"></i><em>
+                                        <p class="mb-0 small"><em>{{ log[5] }}</em></p>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No mood logs yet</p>
+                                {% endif %}
+                            </div>

@@ -1,0 +1,152 @@
+<!-- Goals View -->
+                {% if view == 'goals' %}
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">My Goal</h1>
+                    {% if goals %}
+                    <a href="{{ url_for('user_add_goal') }}" class="btn btn-primary">
+                        <i class="bi bi-pencil-square me-2"></i>Update Goal
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('user_add_goal') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Create Goal
+                    </a>
+                    {% endif %}
+                </div>
+                
+                <div class="row">
+                    {% if goals %}
+                        {% for goal in goals %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card goal-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-bullseye text-success me-2"></i>
+                                            {{ goal[1] }}
+                                        </h5>
+                                        {% if goal[4] == 'Active' %}
+                                            <span class="badge bg-success">{{ goal[4] }}</span>
+                                        {% elif goal[4] == 'Completed' %}
+                                            <span class="badge bg-info">{{ goal[4] }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ goal[4] }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Target Value</small>
+                                            <p class="fw-bold">{{ goal[2] }}</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Current Value</small>
+                                            <p class="fw-bold">{{ goal[3] }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Start Date</small>
+                                            <p>{{ goal[5] }}</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Target Date</small>
+                                            <p>{{ goal[6] }}</p>
+                                        </div>
+                                    </div>
+                                    {% if goal[2] and goal[3] %}
+                                    <div class="progress">
+                                        {% set progress = ((goal[3] | int) / (goal[2] | int) * 100) | int %}
+                                        <div class="progress-bar bg-success" style="width: {{ progress }}%">{{ progress }}%</div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                No goals set yet. <a href="{{ url_for('user_add_goal') }}" class="alert-link">Create your first goal</a> to start tracking your health journey!
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- ML Diet Recommendation Card -->
+                {% if goals %}
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card" style="background: linear-gradient(135deg, #1C1917 0%, #292524 100%); border: none; box-shadow: var(--shadow-lg); border-left: 5px solid var(--accent);">
+                            <div class="card-header" style="background: transparent; border-bottom: 2px solid var(--charcoal-700);">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h4 class="mb-0" style="color: var(--stone-100); font-weight: 700;">
+                                        <i class="bi bi-robot me-2" style="color: var(--accent);"></i>
+                                        AI-Powered Diet Recommendations
+                                    </h4>
+                                    <button id="getRecommendationBtn" class="btn" style="background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: white; font-weight: 600;">
+                                        <i class="bi bi-stars me-2"></i>Get Recommendation
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body" id="recommendationContainer" style="display: none;">
+                                <div id="loadingState" style="text-align: center; padding: 3rem; display: none;">
+                                    <div class="spinner-border" style="color: var(--accent); width: 3rem; height: 3rem;" role="status"></div>
+                                    <p class="mt-3" style="color: var(--stone-300); font-size: 1.1rem;">Analyzing your goals with AI...</p>
+                                </div>
+                                
+                                <div id="recommendationContent" style="display: none;">
+                                    <div class="row align-items-center mb-4">
+                                        <div class="col-md-8">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div id="categoryIcon" style="font-size: 4rem;">🍎</div>
+                                                <div>
+                                                    <h5 style="color: var(--stone-200); font-size: 0.875rem; text-transform: uppercase;">Recommended Category</h5>
+                                                    <h2 id="categoryName" style="color: var(--accent); font-weight: 800;">-</h2>
+                                                    <p id="goalType" style="color: var(--stone-400); margin: 0;">-</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-md-end">
+                                            <div style="background: linear-gradient(135deg, rgba(194, 65, 12, 0.15), rgba(234, 88, 12, 0.1)); padding: 1.5rem; border-radius: 12px; border: 2px solid var(--accent);">
+                                                <p style="color: var(--stone-300); font-size: 0.875rem;">AI Confidence</p>
+                                                <h1 id="confidenceScore" style="color: var(--accent); font-weight: 800; font-size: 3rem;">-</h1>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert" style="background: var(--charcoal-800); border: 1px solid var(--charcoal-600); border-radius: 12px; padding: 1.5rem;">
+                                        <h5 style="color: var(--accent);"><i class="bi bi-lightbulb-fill me-2"></i>Personalized Suggestion</h5>
+                                        <p id="suggestionText" style="color: var(--stone-200); font-size: 1.05rem;">-</p>
+                                    </div>
+                                    
+                                    <h5 style="color: var(--stone-200); margin-top: 2rem;"><i class="bi bi-calculator me-2" style="color: var(--accent);"></i>Nutrition Per Meal</h5>
+                                    <div class="row g-3">
+                                        <div class="col-md-4 col-6"><div style="background: var(--charcoal-800); padding: 1.25rem; border-radius: 10px; text-align: center;"><i class="bi bi-fire" style="color: #F97316; font-size: 2rem;"></i><h3 id="nutCalories" style="color: white; margin: 0.5rem 0; font-weight: 700;">-</h3><p style="color: #F97316; margin: 0; font-size: 0.875rem; font-weight: 700;">Calories</p></div></div>
+                                        <div class="col-md-4 col-6"><div style="background: var(--charcoal-800); padding: 1.25rem; border-radius: 10px; text-align: center;"><i class="bi bi-egg" style="color: #EF4444; font-size: 2rem;"></i><h3 id="nutProtein" style="color: white; margin: 0.5rem 0; font-weight: 700;">-</h3><p style="color: white; margin: 0; font-size: 0.875rem; font-weight: 700;">Protein</p></div></div>
+                                        <div class="col-md-4 col-6"><div style="background: var(--charcoal-800); padding: 1.25rem; border-radius: 10px; text-align: center;"><i class="bi bi-droplet" style="color: #FBBF24; font-size: 2rem;"></i><h3 id="nutFat" style="color: white; margin: 0.5rem 0; font-weight: 700;">-</h3><p style="color: white; margin: 0; font-size: 0.875rem; font-weight: 700;">Fat</p></div></div>
+                                        <div class="col-md-4 col-6"><div style="background: var(--charcoal-800); padding: 1.25rem; border-radius: 10px; text-align: center;"><i class="bi bi-grain" style="color: #A78BFA; font-size: 2rem;"></i><h3 id="nutCarbs" style="color: white; margin: 0.5rem 0; font-weight: 700;">-</h3><p style="color: white; margin: 0; font-size: 0.875rem; font-weight: 700;">Carbs</p></div></div>
+                                        <div class="col-md-4 col-6"><div style="background: var(--charcoal-800); padding: 1.25rem; border-radius: 10px; text-align: center;"><i class="bi bi-asterisk" style="color: #34D399; font-size: 2rem;"></i><h3 id="nutFiber" style="color: white; margin: 0.5rem 0; font-weight: 700;">-</h3><p style="color: white; margin: 0; font-size: 0.875rem; font-weight: 700;">Fiber</p></div></div>
+                                        <div class="col-md-4 col-6"><div style="background: var(--charcoal-800); padding: 1.25rem; border-radius: 10px; text-align: center;"><i class="bi bi-badge-cc" style="color: #60A5FA; font-size: 2rem;"></i><h3 id="nutSatFat" style="color: white; margin: 0.5rem 0; font-weight: 700;">-</h3><p style="color: white; margin: 0; font-size: 0.875rem; font-weight: 700;">Sat. Fat</p></div></div>
+                                    </div>
+                                    
+                                    <div class="alert alert-success mt-3" style="background: rgba(22, 101, 52, 0.2); border: 1px solid var(--success);">
+                                        <i class="bi bi-check-circle-fill me-2"></i>Recommendation saved!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <script>
+                document.getElementById('getRecommendationBtn').addEventListener('click', function() {
+                    // Redirect to AI Recommendation page
+                    window.location.href = "{{ url_for('ai_recommendation') }}";
+                });
+                </script>
+                {% endif %}
+                
+                {% endif %}
+                
+                

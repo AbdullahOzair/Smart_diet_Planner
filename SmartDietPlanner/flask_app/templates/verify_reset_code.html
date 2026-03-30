@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Reset Code - Smart Diet & Lifestyle Planner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card fade-in">
+            <div class="login-header">
+                <div class="login-icon">
+                    <i class="bi bi-badge-check"></i>
+                </div>
+                <h2>Verify Code</h2>
+                <p>Enter the verification code we sent to you</p>
+            </div>
+            
+            <div class="login-body">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <i class="bi bi-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
+                
+                <div class="verification-info mb-4">
+                    <p class="text-muted mb-3" style="font-size: 0.9rem;">
+                        <i class="bi bi-info-circle me-2"></i>
+                        We sent a 6-digit code to your email. Check your inbox or spam folder.
+                    </p>
+                </div>
+                
+                <form method="POST" action="{{ url_for('verify_reset_code') }}">
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="bi bi-key me-2"></i>Verification Code
+                        </label>
+                        <div class="otp-input-group">
+                            <input type="text" class="form-control" name="verification_code" 
+                                   placeholder="000000" maxlength="6" inputmode="numeric" 
+                                   pattern="[0-9]{6}" required autofocus style="text-align: center; font-size: 1.25rem; letter-spacing: 0.5rem; font-weight: 600;">
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            Please enter the 6-digit code
+                        </small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 mb-3">
+                        <i class="bi bi-check-circle me-2"></i>Verify Code
+                    </button>
+                </form>
+                
+                <div class="text-center">
+                    <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 0.75rem;">
+                        Didn't receive the code?
+                    </p>
+                    <a href="{{ url_for('forgot_password') }}" class="btn btn-secondary w-100 mb-3">
+                        <i class="bi bi-arrow-left me-2"></i>Request New Code
+                    </a>
+                    <a href="{{ url_for('login') }}" class="text-muted" style="font-size: 0.875rem; text-decoration: none;">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-format verification code input
+        const codeInput = document.querySelector('input[name="verification_code"]');
+        if (codeInput) {
+            codeInput.addEventListener('input', function(e) {
+                // Only allow digits
+                this.value = this.value.replace(/[^0-9]/g, '');
+                // Auto-submit if 6 digits entered
+                if (this.value.length === 6) {
+                    // Optional: auto-submit
+                    // this.form.submit();
+                }
+            });
+        }
+    </script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.6s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* OTP Input Group */
+        .otp-input-group {
+            position: relative;
+        }
+        
+        .otp-input-group .form-control {
+            letter-spacing: 0.5rem;
+            font-weight: 600;
+            font-size: 1.25rem;
+            text-align: center;
+        }
+        
+        .verification-info {
+            background: linear-gradient(135deg, var(--info-bg) 0%, rgba(3, 105, 161, 0.05) 100%);
+            border-left: 4px solid var(--info);
+            border-radius: 6px;
+            padding: 0.875rem 1rem;
+        }
+        
+        .verification-info i {
+            color: var(--info);
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Smart Diet Planner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            padding-top: 70px;
+            background: linear-gradient(135deg, var(--stone-100) 0%, var(--stone-50) 100%);
+        }
+        
+        /* Card Styles */
+        .card-modern {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card-modern:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        /* Section Headers */
+        .section-header {
+            font-weight: 700;
+            color: var(--charcoal-900);
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .section-header i {
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+        
+        /* Status indicators */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-good {
+            background: rgba(76, 175, 80, 0.15);
+            color: #2e7d32;
+        }
+        
+        .status-warning {
+            background: rgba(255, 152, 0, 0.15);
+            color: #f57c00;
+        }
+        
+        .status-danger {
+            background: rgba(244, 67, 54, 0.15);
+            color: #c62828;
+        }
+        
+        /* Meal card */
+        .meal-item {
+            padding: 1rem;
+            border-left: 4px solid var(--accent);
+            background: linear-gradient(135deg, rgba(255, 140, 66, 0.05), rgba(255, 165, 0, 0.02));
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .meal-item .meal-info h6 {
+            margin: 0 0 0.25rem 0;
+            color: var(--charcoal-900);
+            font-weight: 600;
+        }
+        
+        .meal-item .meal-info p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--charcoal-500);
+        }
+        
+        .meal-calories {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+        
+        /* Quick action buttons */
+        .quick-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1.5rem;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--charcoal-800), var(--charcoal-700));
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        .quick-action-btn i {
+            font-size: 1.75rem;
+            color: var(--accent);
+        }
+        
+        .quick-action-btn:hover {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            color: #fff;
+            text-decoration: none;
+            transform: translateY(-4px);
+        }
+        
+        /* AI Recommendation Card */
+        .ai-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+        }
+        
+        .ai-card .ai-icon {
+            font-size: 3rem;
+            opacity: 0.2;
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+        }
+        
+        /* Responsive Sidebar */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed !important;
+                top: 70px !important;
+                left: -250px !important;
+                width: 250px !important;
+                height: calc(100vh - 70px) !important;
+                z-index: 1000 !important;
+                transition: left 0.3s ease !important;
+                padding: 1rem 0 !important;
+            }
+            
+            .sidebar.show {
+                left: 0 !important;
+            }
+            
+            main {
+                margin-left: 0 !important;
+            }
+            
+            body {
+                padding-top: 50px !important;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            body {
+                padding-top: 45px !important;
+            }
+            
+            main {
+                padding: 1rem !important;
+            }
+            
+            .card-modern {
+                border-radius: 12px !important;
+            }
+            
+            .section-header {
+                font-size: 1.1rem !important;
+            }
+        }
+        
+        /* Personal Information Box - Maroon Color */
+        .personal-info-box {
+            background: #660000 !important;
+            color: #fff !important;
+        }
+        
+        .personal-info-box h6 {
+            color: #fff !important;
+        }
+        
+        .personal-info-box p {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: var(--charcoal-900); box-shadow: var(--shadow-lg); border-bottom: 3px solid var(--accent); z-index: 1030;">
+        <div class="container-fluid">
+            <button class="btn btn-link text-white d-md-none me-2" id="sidebarToggle" style="font-size: 1.5rem; text-decoration: none; border: none;">
+                <i class="bi bi-list"></i>
+            </button>
+            <a class="navbar-brand" href="/user/dashboard" style="font-weight: 800; font-size: 1.375rem;">
+                <i class="bi bi-heart-pulse-fill me-2" style="color: var(--accent);"></i>
+                Smart Diet Planner
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" style="background: var(--charcoal-800); padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">
+                            <i class="bi bi-person-circle me-1" style="color: var(--accent);"></i>
+                            Admin 
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/user/profile">
+                                <i class="bi bi-person me-2"></i>Profile
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout">
+                                <i class="bi bi-box-arrow-right me-2"></i>Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container-fluid">
+        <div class="row">
+            
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar" style="background: var(--charcoal-900); min-height: calc(100vh - 70px); padding: 1.5rem 0; position: fixed; top: 70px; left: 0; overflow-y: auto; z-index: 1020;">
+                <div class="pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link " href="/user/dashboard" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; ">
+                                <i class="bi bi-speedometer2" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/user/profile" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; ">
+                                <i class="bi bi-person" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                My Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/user/goals" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; ">
+                                <i class="bi bi-bullseye" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                My Goals
+                            </a>
+                        </li>
+                        <hr style="border-color: var(--charcoal-700); margin: 1rem 0.75rem;">
+                        <li class="nav-item small ps-3" style="color: var(--charcoal-500); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.688rem; padding: 0 0.75rem; margin-bottom: 0.5rem;">LOGS</li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/user/add-daily-log" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; ">
+                                <i class="bi bi-calendar-plus" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                Add Daily Log
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/user/add-meal-log" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; ">
+                                <i class="bi bi-egg-fried" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                Add Meal Log
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/user/add-activity-log" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; ">
+                                <i class="bi bi-activity" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                Add Activity Log
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/user/add-mood-log" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; ">
+                                <i class="bi bi-emoji-smile" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                Add Mood Log
+                            </a>
+                        </li>
+                        <hr style="border-color: var(--charcoal-700); margin: 1rem 0.75rem;">
+                        <li class="nav-item small ps-3" style="color: var(--charcoal-500); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.688rem; padding: 0 0.75rem; margin-bottom: 0.5rem;">AI & REPORTS</li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="#" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; ">
+                                <i class="bi bi-robot" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                AI Recommendation
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="#" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; ">
+                                <i class="bi bi-clock-history" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                AI History
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="#" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; ">
+                                <i class="bi bi-cpu-fill" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                ML Recommendations
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/user/suggestions" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; ">
+                                <i class="bi bi-lightbulb" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                AI Suggestions
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/user/reports" style="color: var(--stone-300); padding: 0.75rem 1.25rem; margin: 0.125rem 0.75rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; ">
+                                <i class="bi bi-file-earmark-bar-graph" style="font-size: 1.125rem; width: 20px; text-align: center;"></i>
+                                My Reports
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" style="background: var(--stone-100); min-height: calc(100vh - 70px); padding: 1.5rem 2rem !important; margin-left: 16.666667%; /* Offset for sidebar */">
+                
+                <!-- Flash Messages -->
+                
+                    
+                
+                
+                <!-- Dashboard View Only -->
+                
+                
+                <!-- Profile View -->
+                
+                
+                <!-- Goals View -->
+                
+                
+                <!-- Add/Update Goal View -->
+                
+                
+                <!-- Add Daily Log View - REDESIGNED -->
+                
+                
+                <!-- Add Meal Log View -->
+                
+                
+                <!-- Add Activity Log View - SMART FITNESS TRACKER -->
+                
+                
+                <!-- Add Mood Log View -->
+                
+                
+                <!-- AI Recommendation Section -->
+                
+                
+                <!-- AI Recommendation History Section -->
+                
+                
+                <!-- ML Recommendation Section -->
+                
+
+                <!-- AI Suggestions (Original) -->
+                
+                
+                <!-- Reports View -->
+                
+                
+                <!-- Add Water View -->
+                
+                
+                <!-- Progress Tracking View -->
+                
+                
+            </main>
+        </div>
+    </div>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <style>
+        /* Sidebar Navigation Hover Effects */
+        .sidebar .nav-link:not(.active):hover {
+            background: var(--charcoal-800) !important;
+            color: var(--stone-100) !important;
+        }
+        
+        /* Card 3D Effects */
+        .card {
+            transition: all 0.2s ease;
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-lg), inset 0 1px 2px rgba(255, 255, 255, 1) !important;
+        }
+        
+        /* Stat Card Hover */
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg) !important;
+            border-color: var(--accent) !important;
+        }
+        
+        /* Button 3D Press Effect */
+        .btn:active {
+            transform: translateY(1px) !important;
+            box-shadow: 0 1px 2px rgba(28, 25, 23, 0.2) !important;
+        }
+        
+        /* Table Row Hover */
+        .table tbody tr:hover {
+            background: var(--stone-100) !important;
+            box-shadow: 0 2px 4px rgba(28, 25, 23, 0.04);
+        }
+        
+        /* Input Focus 3D Effect */
+        .form-control:focus,
+        .form-select:focus {
+            box-shadow: 0 0 0 3px var(--accent-glow), 
+                        inset 0 1px 2px rgba(28, 25, 23, 0.05) !important;
+        }
+        
+        /* Dropdown Menu */
+        .dropdown-menu {
+            background: var(--stone-50);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            padding: 0.5rem;
+        }
+        
+        .dropdown-item {
+            padding: 0.625rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: var(--charcoal-700);
+            transition: all 0.15s;
+        }
+        
+        .dropdown-item:hover {
+            background: var(--stone-100);
+            color: var(--charcoal-900);
+        }
+        
+        /* Badge 3D Effect */
+        .badge {
+            box-shadow: 0 1px 3px rgba(28, 25, 23, 0.1),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Alert 3D Effect */
+        .alert {
+            box-shadow: 0 2px 6px rgba(28, 25, 23, 0.06),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+        }
+    </style>
+    
+    <!-- Water Glass Addition JavaScript -->
+    <script>
+    function addWaterGlass() {
+        console.log('🔵 addWaterGlass() called');
+        
+        const btn = document.getElementById('addWaterBtn');
+        if (!btn) {
+            console.error('❌ Button element not found!');
+            return;
+        }
+        
+        console.log('✅ Button found, proceeding with API call...');
+        
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Adding...';
+        
+        // Make API call with comprehensive error handling
+        fetch('/api/add-water-glass', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include'  // Include session cookies
+        })
+        .then(response => {
+            console.log(`📊 Response status: ${response.status}`);
+            
+            if (response.status === 401) {
+                throw new Error('Not authenticated - please log in first');
+            }
+            if (response.status === 500) {
+                throw new Error('Server error - please check console logs');
+            }
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('📦 API Response:', data);
+            
+            if (data.success) {
+                console.log('✅ Success! Water glass added');
+                
+                // Restore button
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+                
+                // Show success message
+                showNotification('success', `💧 ${data.message}`);
+                
+                // Update water glass display dynamically without reload
+                updateWaterGlassDisplay(data.water_glasses);
+                
+                // Also update all water displays on the page
+                updateAllWaterDisplays(data.water_glasses);
+                
+            } else {
+                throw new Error(data.error || 'Failed to add water glass');
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error:', error);
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            showNotification('error', `❌ Error: ${error.message}`);
+        });
+    }
+    
+    function updateWaterGlassDisplay(glassCount) {
+        console.log(`🥤 Updating water glass display to ${glassCount} glasses`);
+        
+        // Update the 8-glass visual indicator in the hydration tracker
+        const waterGlasses = document.querySelectorAll('[style*="width: 40px; height: 40px"]');
+        console.log(`Found ${waterGlasses.length} glass elements`);
+        
+        let glassesUpdated = 0;
+        waterGlasses.forEach((glass, index) => {
+            if (index < 8) {  // Only update the first 8 glasses
+                if (index < glassCount) {
+                    // Fill glass
+                    glass.style.background = 'linear-gradient(135deg, #06b6d4, #22d3ee)';
+                    glass.style.color = '#fff';
+                    glass.style.boxShadow = '0 4px 12px rgba(6, 182, 212, 0.3)';
+                    glass.style.borderColor = '#06b6d4';
+                    glassesUpdated++;
+                } else {
+                    // Empty glass
+                    glass.style.background = 'rgba(0,0,0,0.05)';
+                    glass.style.color = 'var(--charcoal-400)';
+                    glass.style.boxShadow = 'none';
+                    glass.style.borderColor = 'rgba(0,0,0,0.1)';
+                }
+            }
+        });
+        console.log(`✅ Updated ${glassesUpdated} glasses`);
+    }
+    
+    function updateAllWaterDisplays(glassCount) {
+        console.log(`🔄 Updating all water displays on page to: ${glassCount} glasses`);
+        
+        // Update the main water display (X/8 glasses)
+        // First, find the element that shows "X / 8 glasses"
+        const waterGlassCountElements = document.querySelectorAll('h4');
+        waterGlassCountElements.forEach(element => {
+            if (element.textContent.includes('glasses')) {
+                // Update only the water count part (before the /)
+                const textContent = element.textContent;
+                const goalMatch = textContent.match(/\/\s*(\d+)/);
+                if (goalMatch) {
+                    const goal = goalMatch[1];
+                    element.textContent = `${glassCount}/${goal} `;
+                    // Re-add the "glasses" span
+                    const span = document.createElement('span');
+                    span.style.fontSize = '0.7em';
+                    span.style.color = 'var(--charcoal-500)';
+                    span.innerHTML = `glasses`;
+                    element.appendChild(span);
+                }
+            }
+        });
+        
+        // Update water input field in add-daily-log page if it exists
+        const waterInput = document.getElementById('waterInput');
+        if (waterInput) {
+            // Convert glasses to liters (1 glass = 0.25 liters)
+            const liters = (glassCount * 0.25).toFixed(1);
+            waterInput.value = liters;
+            console.log(`💧 Updated daily log water input to ${liters}L (${glassCount} glasses)`);
+            
+            // Trigger the updateWaterDisplay to update progress bar
+            if (typeof updateWaterDisplay === 'function') {
+                updateWaterDisplay();
+            }
+        }
+        
+        // Update progress bar percentage if it exists
+        updateWaterProgressBar(glassCount);
+    }
+    
+    function updateWaterProgressBar(glassCount) {
+        // Find and update water progress percentage
+        // Assuming 8 glasses is the goal
+        const waterGoal = 8;
+        const percentage = Math.min((glassCount / waterGoal) * 100, 100);
+        console.log(`📊 Water progress: ${glassCount}/${waterGoal} = ${percentage}%`);
+        
+        // Find all progress bars that might be water-related
+        const progressBars = document.querySelectorAll('[style*="background: linear-gradient(90deg"]');
+        progressBars.forEach(bar => {
+            // Check if this is the water bar (cyan color #06b6d4)
+            if (bar.style.background && bar.style.background.includes('06b6d4')) {
+                bar.style.width = percentage + '%';
+            }
+        });
+    }
+    
+    function showNotification(type, message) {
+        console.log(`📢 Showing ${type} notification: ${message}`);
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+        notification.setAttribute('role', 'alert');
+        notification.style.position = 'fixed';
+        notification.style.top = '80px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.style.minWidth = '300px';
+        notification.style.borderRadius = '8px';
+        notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto remove after 4 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 4000);
+    }
+    
+    // Add Water Glass Function for water tracking page
+    function addWaterGlass() {
+        fetch('/api/add-water-glass', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('success', '✓ Water glass added! Hydrate well! 💧');
+                // Refresh the page after a short delay to see updated data
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                showNotification('error', '✗ Error adding water: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', '✗ Failed to add water');
+        });
+    }
+    
+    // Edit Profile Information
+    function editProfileSection(section) {
+        const modal = new bootstrap.Modal(document.getElementById('editModal'), {});
+        document.getElementById('editModalTitle').textContent = `Edit ${section}`;
+        
+        // Store the section name in a data attribute for later use
+        document.getElementById('editForm').dataset.section = section;
+        
+        let formFields = '';
+        
+        // Create specific form fields based on section with current values pre-filled
+        if (section === 'Personal Information') {
+            formFields = `
+                <div class="mb-3">
+                    <label for="firstName" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="firstName" name="first_name" placeholder="First Name" value="ADMIN" required>
+                </div>
+                <div class="mb-3">
+                    <label for="lastName" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lastName" name="last_name" placeholder="Last Name" value="Admin" required>
+                </div>
+                <div class="mb-3">
+                    <label for="dob" class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control" id="dob" name="date_of_birth" value="User" required>
+                </div>
+            `;
+        } else if (section === 'Body Metrics') {
+            formFields = `
+                <div class="mb-3">
+                    <label for="height" class="form-label">Height (cm)</label>
+                    <input type="number" class="form-control" id="height" name="height" placeholder="Height in cm" step="0.1" value="70.00" required>
+                </div>
+                <div class="mb-3">
+                    <label for="weight" class="form-label">Current Weight (kg)</label>
+                    <input type="number" class="form-control" id="weight" name="weight" placeholder="Current Weight" step="0.1" value="O" required>
+                </div>
+                <div class="mb-3">
+                    <label for="targetWeight" class="form-label">Target Weight (kg)</label>
+                    <input type="number" class="form-control" id="targetWeight" name="target_weight" placeholder="Target Weight" step="0.1" value="Metric" required>
+                </div>
+            `;
+        } else if (section === 'Lifestyle') {
+            const currentLevel = "170.00";
+            formFields = `
+                <div class="mb-3">
+                    <label for="activityLevel" class="form-label">Activity Level</label>
+                    <select class="form-control" id="activityLevel" name="activity_level" required>
+                        <option value="Sedentary" ${currentLevel === 'Sedentary' ? 'selected' : ''}>Sedentary</option>
+                        <option value="Light" ${currentLevel === 'Light' ? 'selected' : ''}>Light</option>
+                        <option value="Moderate" ${currentLevel === 'Moderate' ? 'selected' : ''}>Moderate</option>
+                        <option value="Active" ${currentLevel === 'Active' ? 'selected' : ''}>Active</option>
+                        <option value="Very Active" ${currentLevel === 'Very Active' ? 'selected' : ''}>Very Active</option>
+                    </select>
+                </div>
+            `;
+        } else if (section === 'Dietary Preferences') {
+            const currentDiet = "Moderate";
+            formFields = `
+                <div class="mb-3">
+                    <label for="dietPref" class="form-label">Dietary Preference</label>
+                    <select class="form-control" id="dietPref" name="dietary_preference" required>
+                        <option value="Omnivore" ${currentDiet === 'Omnivore' ? 'selected' : ''}>Omnivore</option>
+                        <option value="Vegetarian" ${currentDiet === 'Vegetarian' ? 'selected' : ''}>Vegetarian</option>
+                        <option value="Vegan" ${currentDiet === 'Vegan' ? 'selected' : ''}>Vegan</option>
+                        <option value="Keto" ${currentDiet === 'Keto' ? 'selected' : ''}>Keto</option>
+                        <option value="Halal" ${currentDiet === 'Halal' ? 'selected' : ''}>Halal</option>
+                    </select>
+                </div>
+            `;
+        } else if (section === 'Health & Allergies') {
+            formFields = `
+                <div class="mb-3">
+                    <label for="allergies" class="form-label">Allergies (comma-separated)</label>
+                    <textarea class="form-control" id="allergies" name="allergies" placeholder="e.g., peanuts, dairy" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="healthCondition" class="form-label">Medical Conditions (comma-separated)</label>
+                    <textarea class="form-control" id="healthCondition" name="health_condition" placeholder="e.g., diabetes, hypertension" rows="2">None</textarea>
+                </div>
+            `;
+        }
+        
+        document.getElementById('editFormFields').innerHTML = formFields;
+        modal.show();
+    }
+    
+    // Save Profile Changes
+    function saveProfileChanges(event) {
+        event.preventDefault();
+        
+        const form = document.getElementById('editForm');
+        const formData = new FormData(form);
+        
+        // Prepare data for API call - collect all fields
+        let updates = {};
+        
+        for (let [key, value] of formData.entries()) {
+            updates[key] = value.trim();
+        }
+        
+        if (Object.keys(updates).length === 0) {
+            showNotification('error', '❌ Please fill in at least one field');
+            return;
+        }
+        
+        // Call API to update profile
+        fetch('/api/update-profile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ updates: updates })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('success', `✓ ${data.message}`);
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                modal.hide();
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                showNotification('error', `❌ ${data.error || 'Failed to update'}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', '❌ Error updating profile');
+        });
+    }
+    
+    function openWaterGoalModal(litersValue) {
+        console.log('🌊 Opening water goal edit modal. Given value:', litersValue);
+        
+        let currentValue = '2';
+        
+        // Use the passed value from python backend if valid
+        if (litersValue && !isNaN(parseFloat(litersValue))) {
+            currentValue = parseFloat(litersValue).toString();
+        } else {
+            // Fallback to text parsing if needed
+            const smallElements = document.querySelectorAll('small');
+            for (let el of smallElements) {
+                if (el.textContent.includes('Goal:')) {
+                    const goalMatch = el.textContent.match(/Goal:\s*(\d+)\s*glasses/);
+                    if (goalMatch) {
+                        currentValue = (goalMatch[1] / 4).toString();
+                        break;
+                    }
+                }
+            }
+        }
+        
+        const modal = new bootstrap.Modal(document.getElementById('waterGoalModal'));
+        const inputField = document.getElementById('waterGoalInput');
+        inputField.value = currentValue;
+        
+        // Dispatch input event to update calculations live
+        inputField.dispatchEvent(new Event('input'));
+        
+        modal.show();
+    }
+    
+    function updateWaterGoal() {
+        console.log('💾 Updating water goal');
+        
+        const waterGoalInput = document.getElementById('waterGoalInput');
+        const submitBtn = document.getElementById('updateWaterGoalBtn');
+        const waterValue = waterGoalInput.value.trim();
+        
+        if (!waterValue || isNaN(waterValue)) {
+            showNotification('error', '❌ Please enter a valid number');
+            return;
+        }
+        
+        const waterGoal = waterValue + ' L';
+        console.log(`Sending water goal: ${waterGoal}`);
+        
+        // Disable button during submission
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+        
+        fetch('/api/update-water-goal', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ water_goal: waterGoal })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                console.log('✅ Water goal updated:', data);
+                showNotification('success', `✅ ${data.message}`);
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('waterGoalModal'));
+                modal.hide();
+                
+                // Update display after 1 second
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                throw new Error(data.error || 'Failed to update water goal');
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error:', error);
+            showNotification('error', `❌ ${error.message}`);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Update Goal';
+        });
+    }
+    
+    // Allow Enter key to submit
+    document.addEventListener('DOMContentLoaded', function() {
+        const waterGoalInput = document.getElementById('waterGoalInput');
+        if (waterGoalInput) {
+            waterGoalInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    updateWaterGoal();
+                }
+            });
+        }
+    });
+    </script>
+    
+    <!-- Water Goal Modal -->
+    <div class="modal fade" id="waterGoalModal" tabindex="-1" aria-labelledby="waterGoalModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 12px; border: 1px solid rgba(6, 182, 212, 0.2);">
+                <div class="modal-header" style="border-bottom: 1px solid rgba(0,0,0,0.1); background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(34, 211, 238, 0.05));">
+                    <h5 class="modal-title" id="waterGoalModalLabel" style="color: #06b6d4; font-weight: 700;">
+                        <i class="bi bi-droplet-fill me-2"></i>Daily Water Goal
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding: 2rem;">
+                    <div class="mb-3">
+                        <label for="waterGoalInput" class="form-label" style="font-weight: 600; color: var(--charcoal-700);">
+                            How many liters of water do you want to drink per day?
+                        </label>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="number" class="form-control" id="waterGoalInput" placeholder="8" min="1" max="20" value="8" style="font-size: 1.1em;">
+                            <span style="font-weight: 600; color: var(--charcoal-600);">L</span>
+                        </div>
+                        <small style="color: var(--charcoal-500); display: block; margin-top: 0.5rem;">
+                            💡 Standard recommendation: 8 glasses = 2 liters per day
+                        </small>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(34, 211, 238, 0.05)); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <small style="color: var(--charcoal-600);">
+                            <strong>Current Goal:</strong> <span id="currentGoalDisplay">8 L</span><br>
+                            <strong>Glasses:</strong> <span id="goalGlassesDisplay">32</span> (250ml per glass)
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid rgba(0,0,0,0.1); padding: 1.25rem;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="updateWaterGoalBtn" onclick="updateWaterGoal()">
+                        <i class="bi bi-check-circle me-2"></i>Update Goal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Update water goal live preview -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const waterGoalInput = document.getElementById('waterGoalInput');
+        if (waterGoalInput) {
+            waterGoalInput.addEventListener('input', function() {
+                const liters = this.value || '8';
+                const glasses = Math.floor(liters * 4);
+                document.getElementById('currentGoalDisplay').textContent = liters + ' L';
+                document.getElementById('goalGlassesDisplay').textContent = glasses + ' glasses';
+            });
+        }
+    });
+    </script>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 12px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--accent), #FF8C42); color: #FFF; border: none;">
+                    <h5 class="modal-title" id="editModalTitle" style="font-weight: 700;">Edit Profile</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding: 2rem;">
+                    <form id="editForm" onsubmit="saveProfileChanges(event)">
+                        <div id="editFormFields"></div>
+                        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn" style="background: var(--accent); color: white; flex: 1; font-weight: 600;">
+                                <i class="bi bi-check-circle me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    sidebar.classList.toggle('show');
+                });
+                
+                // Close sidebar when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                        sidebar.classList.remove('show');
+                    }
+                });
+                
+                // Close sidebar when navigation link is clicked
+                const sidebarLinks = sidebar.querySelectorAll('a');
+                sidebarLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        sidebar.classList.remove('show');
+                    });
+                });
+            }
+        });
+
+        // ========== MEAL LOG ENHANCEMENT FUNCTIONS ==========
+        
+        // Filter meals based on search input
+        function filterMeals() {
+            const searchInput = document.getElementById('mealSearch');
+            const mealSelect = document.getElementById('mealSelect');
+            const searchTerm = searchInput.value.toLowerCase();
+            const options = mealSelect.options;
+            
+            for (let i = 0; i < options.length; i++) {
+                const option = options[i];
+                if (i === 0) continue; // Skip "Choose a meal" option
+                
+                const mealName = option.textContent.toLowerCase();
+                if (mealName.includes(searchTerm)) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            }
+        }
+        
+        // Update nutrition preview when meal is selected or quantity changes
+        function updateNutrition() {
+            const mealSelect = document.getElementById('mealSelect');
+            const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+            const nutritionPreview = document.getElementById('nutritionPreview');
+            
+            if (!mealSelect.value || quantity <= 0) {
+                nutritionPreview.style.display = 'none';
+                return;
+            }
+            
+            const selectedOption = mealSelect.options[mealSelect.selectedIndex];
+            const baseCalories = parseFloat(selectedOption.dataset.calories) || 0;
+            const baseProtein = parseFloat(selectedOption.dataset.protein) || 0;
+            const baseCarbs = parseFloat(selectedOption.dataset.carbs) || 0;
+            const baseFats = parseFloat(selectedOption.dataset.fats) || 0;
+            
+            // Calculate totals based on quantity
+            const totalCalories = (baseCalories * quantity).toFixed(0);
+            const totalProtein = (baseProtein * quantity).toFixed(1);
+            const totalCarbs = (baseCarbs * quantity).toFixed(1);
+            const totalFats = (baseFats * quantity).toFixed(1);
+            
+            // Update preview
+            document.getElementById('previewCalories').textContent = totalCalories + ' kcal';
+            document.getElementById('previewProtein').textContent = totalProtein + ' g';
+            document.getElementById('previewCarbs').textContent = totalCarbs + ' g';
+            document.getElementById('previewFats').textContent = totalFats + ' g';
+            
+            nutritionPreview.style.display = 'block';
+        }
+        
+        // Increase quantity with + button
+        function increaseQty() {
+            const qtyInput = document.getElementById('quantity');
+            qtyInput.value = (parseFloat(qtyInput.value) + 0.1).toFixed(1);
+            updateNutrition();
+        }
+        
+        // Decrease quantity with - button
+        function decreaseQty() {
+            const qtyInput = document.getElementById('quantity');
+            const newVal = parseFloat(qtyInput.value) - 0.1;
+            if (newVal >= 0.1) {
+                qtyInput.value = newVal.toFixed(1);
+                updateNutrition();
+            }
+        }
+        
+        // Set meal time to now
+        function setNow() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('meal_time').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+        
+        // Toggle quick tag buttons
+        function toggleTag(btn, tagName) {
+            const tagsInput = document.getElementById('selectedTags');
+            let tags = tagsInput.value ? tagsInput.value.split(',').map(t => t.trim()) : [];
+            
+            btn.style.borderColor = btn.style.borderColor === 'rgb(194, 65, 12)' ? '#ddd' : 'var(--accent)';
+            btn.style.background = btn.style.background === 'var(--accent)' ? '#fff' : 'var(--accent)';
+            btn.style.color = btn.style.color === 'rgb(255, 255, 255)' ? '#666' : '#FFFFFF';
+            
+            if (tags.includes(tagName)) {
+                tags = tags.filter(t => t !== tagName);
+            } else {
+                tags.push(tagName);
+            }
+            
+            tagsInput.value = tags.join(', ');
+        }
+        
+        // ========== COMMUNITY MEAL SYSTEM FUNCTIONS ==========
+        
+        // Smart meal search with API
+        function smartMealSearch() {
+            const searchInput = document.getElementById('mealSearch');
+            const category = document.querySelector('input[name="meal_category"]:checked');
+            const query = searchInput.value.trim();
+            const categoryValue = category ? category.value : '';
+            
+            const resultsList = document.getElementById('resultsList');
+            const searchResults = document.getElementById('mealSearchResults');
+            
+            if (query.length === 0 && !categoryValue) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            // Build API URL
+            let apiUrl = '/api/meals/search?limit=15';
+            if (query) apiUrl += `&q=${encodeURIComponent(query)}`;
+            if (categoryValue) apiUrl += `&category=${encodeURIComponent(categoryValue)}`;
+            
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    resultsList.innerHTML = '';
+                    
+                    if (data.success && data.meals && data.meals.length > 0) {
+                        data.meals.forEach(meal => {
+                            const div = document.createElement('div');
+                            div.style.cssText = 'padding: 0.75rem; border-bottom: 1px solid #eee; cursor: pointer; transition: all 0.2s;';
+                            div.onmouseover = function() { this.style.background = '#f5f5f5'; };
+                            div.onmouseout = function() { this.style.background = 'transparent'; };
+                            div.onclick = function() { selectMeal(meal.id, meal.name, meal.category, meal.calories, meal.protein, meal.carbs, meal.fats); };
+                            
+                            div.innerHTML = `
+                                <div style="display: flex; justify-content: space-between;">
+                                    <div>
+                                        <strong style="color: #1e1818;">${meal.name}</strong>
+                                        <small style="color: #7a8490; display: block; margin-top: 0.2rem;">${meal.category}</small>
+                                    </div>
+                                    <span style="color: var(--accent); font-weight: 700;">${meal.calories} cal</span>
+                                </div>
+                            `;
+                            resultsList.appendChild(div);
+                        });
+                        searchResults.style.display = 'block';
+                    } else {
+                        resultsList.innerHTML = `
+                            <div style="padding: 1rem; text-align: center; color: #7a8490;">
+                                <p style="margin: 0; font-weight: 600;">No meals found</p>
+                                <small>Try different keywords or add a custom meal</small>
+                            </div>
+                        `;
+                        searchResults.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                });
+        }
+        
+        // Select a meal from search results
+        function selectMeal(mealId, mealName, category, calories, protein, carbs, fats) {
+            const mealSelect = document.getElementById('mealSelect');
+            const searchResults = document.getElementById('mealSearchResults');
+            const selectedDisplay = document.getElementById('selectedMealDisplay');
+            const selectedMealName = document.getElementById('selectedMealName');
+            const searchInput = document.getElementById('mealSearch');
+            
+            // Set the hidden select
+            mealSelect.value = mealId;
+            
+            // Update display
+            selectedMealName.textContent = `✓ ${mealName}`;
+            selectedDisplay.style.display = 'block';
+            searchResults.style.display = 'none';
+            searchInput.value = '';
+            
+            // Update nutrition preview
+            updateNutrition();
+            
+            // Scroll down to show nutrition
+            setTimeout(() => {
+                document.getElementById('nutritionPreview')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+        
+        // Open add meal modal
+        function openAddMealModal() {
+            document.getElementById('addMealModal').style.display = 'flex';
+            document.getElementById('customMealForm').reset();
+            document.getElementById('customMealMessage').style.display = 'none';
+        }
+        
+        // Close add meal modal
+        function closeAddMealModal() {
+            document.getElementById('addMealModal').style.display = 'none';
+            document.getElementById('customMealMessage').style.display = 'none';
+        }
+        
+        // Submit custom meal
+        function submitCustomMeal(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('customMealName').value.trim();
+            const category = document.getElementById('customMealCategory').value;
+            const calories = parseFloat(document.getElementById('customMealCalories').value) || 0;
+            const protein = parseFloat(document.getElementById('customMealProtein').value) || 0;
+            const carbs = parseFloat(document.getElementById('customMealCarbs').value) || 0;
+            const fats = parseFloat(document.getElementById('customMealFats').value) || 0;
+            
+            if (!name || !category || calories <= 0) {
+                showMealMessage('Please fill all required fields', 'error');
+                return;
+            }
+            
+            fetch('/api/meals/add-custom', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, category, calories, protein, carbs, fats })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMealMessage(`✓ ${data.message}`, 'success');
+                        setTimeout(() => {
+                            // Add the new meal to the select with all data attributes
+                            const mealSelect = document.getElementById('mealSelect');
+                            const newOption = document.createElement('option');
+                            newOption.value = data.mealId;
+                            newOption.setAttribute('data-meal-name', name);
+                            newOption.setAttribute('data-category', category);
+                            newOption.setAttribute('data-calories', calories);
+                            newOption.setAttribute('data-protein', protein);
+                            newOption.setAttribute('data-carbs', carbs);
+                            newOption.setAttribute('data-fats', fats);
+                            newOption.textContent = name;
+                            mealSelect.appendChild(newOption);
+                            
+                            // Now select it
+                            selectMeal(data.mealId, name, category, calories, protein, carbs, fats);
+                            closeAddMealModal();
+                        }, 1000);
+                    } else if (data.error === 'Meal already exists') {
+                        showMealMessage(`Meal already exists! Selecting it...`, 'info');
+                        setTimeout(() => {
+                            selectMeal(data.mealId, name, category, calories, protein, carbs, fats);
+                            closeAddMealModal();
+                        }, 1000);
+                    } else {
+                        showMealMessage(data.error || 'Failed to add meal', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMealMessage('Error: ' + error.message, 'error');
+                });
+        }
+        
+        // Show message in modal
+        function showMealMessage(msg, type) {
+            const msgDiv = document.getElementById('customMealMessage');
+            msgDiv.textContent = msg;
+            msgDiv.style.background = type === 'error' ? '#ffe0e0' : type === 'success' ? '#e0ffe0' : '#ffe0b0';
+            msgDiv.style.color = type === 'error' ? '#cc0000' : type === 'success' ? '#006600' : '#996600';
+            msgDiv.style.display = 'block';
+        }
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#mealSearch') && !e.target.closest('#mealSearchResults')) {
+                document.getElementById('mealSearchResults').style.display = 'none';
+            }
+        });
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('addMealModal');
+            if (e.target === modal) {
+                closeAddMealModal();
+            }
+        });
+        
+        // Set up meal select to update nutrition preview
+        document.addEventListener('DOMContentLoaded', function() {
+            const mealSelect = document.getElementById('mealSelect');
+            if (mealSelect) {
+                mealSelect.addEventListener('change', updateNutrition);
+            }
+        });
+
+        // ============================================================================
+        // SMART ACTIVITY TRACKER FUNCTIONS (NEW)
+        // ============================================================================
+
+        // Show initial activities when search box is focused
+        function showInitialActivities() {
+            const query = ''; // Empty query to get all activities
+            const category = document.querySelector('input[name="activity_category"]:checked')?.value || '';
+            
+            fetch(`/api/activities/search?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&limit=20`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.activities && data.activities.length > 0) {
+                        let html = '';
+                        data.activities.forEach(activity => {
+                            html += `<div data-activity-id="${activity.id}" data-activity-name="${activity.name.replace(/"/g, '&quot;')}" data-activity-category="${activity.category}" data-activity-met="${activity.metValue}" data-activity-calories="${activity.caloriesPerMinute}" class="activityItem" style="padding: 0.75rem; border-bottom: 1px solid #eee; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">
+                                <p style="color: #1e1818; font-weight: 600; margin: 0; font-size: 0.9rem;">${activity.name}</p>
+                                <small style="color: #7a8490; font-weight: 500;">${activity.category} • ${activity.caloriesPerMinute} kcal/min</small>
+                            </div>`;
+                        });
+                        document.getElementById('activityResultsList').innerHTML = html;
+                        document.getElementById('activitySearchResults').style.display = 'block';
+                        attachActivityItemListeners();
+                    } else {
+                        document.getElementById('activityResultsList').innerHTML = '<div style="padding: 1rem; text-align: center; color: #999;">No activities found. Type to search or add a new one!</div>';
+                        document.getElementById('activitySearchResults').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Initial load error:', error);
+                });
+        }
+
+        // Smart activity search
+        function smartActivitySearch() {
+            const query = document.getElementById('activitySearch').value.trim();
+            const category = document.querySelector('input[name="activity_category"]:checked')?.value || '';
+            
+            console.log('Searching for:', query, 'in category:', category);
+            
+            if (query.length < 2) {
+                document.getElementById('activitySearchResults').style.display = 'none';
+                return;
+            }
+            
+            const searchUrl = `/api/activities/search?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&limit=15`;
+            console.log('Fetch URL:', searchUrl);
+            
+            fetch(searchUrl)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Search response:', data);
+                    if (data.success && data.activities && data.activities.length > 0) {
+                        let html = '';
+                        data.activities.forEach(activity => {
+                            html += `<div data-activity-id="${activity.id}" data-activity-name="${activity.name.replace(/"/g, '&quot;')}" data-activity-category="${activity.category}" data-activity-met="${activity.metValue}" data-activity-calories="${activity.caloriesPerMinute}" class="activityItem" style="padding: 0.75rem; border-bottom: 1px solid #eee; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">
+                                <p style="color: #1e1818; font-weight: 600; margin: 0; font-size: 0.9rem;">${activity.name}</p>
+                                <small style="color: #7a8490; font-weight: 500;">${activity.category} • ${activity.caloriesPerMinute} kcal/min</small>
+                            </div>`;
+                        });
+                        document.getElementById('activityResultsList').innerHTML = html;
+                        document.getElementById('activitySearchResults').style.display = 'block';
+                        attachActivityItemListeners();
+                    } else {
+                        document.getElementById('activityResultsList').innerHTML = '<div style="padding: 1rem; text-align: center; color: #999;">No activities found</div>';
+                        document.getElementById('activitySearchResults').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    document.getElementById('activityResultsList').innerHTML = '<div style="padding: 1rem; text-align: center; color: #f00;">Error loading activities</div>';
+                    document.getElementById('activitySearchResults').style.display = 'block';
+                });
+        }
+        
+        // Attach mousedown listeners to activity items
+        function attachActivityItemListeners() {
+            document.querySelectorAll('.activityItem').forEach(item => {
+                item.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    const activityId = this.getAttribute('data-activity-id');
+                    const name = this.getAttribute('data-activity-name');
+                    const category = this.getAttribute('data-activity-category');
+                    const metValue = this.getAttribute('data-activity-met');
+                    const caloriesPerMinute = this.getAttribute('data-activity-calories');
+                    
+                    selectActivity(activityId, name, category, metValue, caloriesPerMinute);
+                });
+            });
+        }
+        
+        // Close dropdown when clicking outside (but not on the dropdown itself)
+        document.addEventListener('click', function(event) {
+            const searchInput = document.getElementById('activitySearch');
+            const dropdown = document.getElementById('activitySearchResults');
+            const addButton = event.target.closest('button[onclick*="openAddActivityModal"]');
+            
+            // Close dropdown only if clicking outside both input and dropdown
+            if (event.target !== searchInput && !dropdown.contains(event.target) && !addButton) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // Select activity
+        function selectActivity(activityId, name, category, metValue, caloriesPerMinute) {
+            console.log('Selecting activity:', { activityId, name, category, metValue, caloriesPerMinute });
+            
+            const activitySelect = document.getElementById('activitySelect');
+            const option = document.createElement('option');
+            option.value = activityId;
+            option.setAttribute('data-activity-name', name);
+            option.setAttribute('data-category', category);
+            option.setAttribute('data-met-value', metValue);
+            option.setAttribute('data-calories-per-minute', caloriesPerMinute);
+            option.textContent = name;
+            
+            // Check if option already exists
+            if (!Array.from(activitySelect.options).find(opt => opt.value == activityId)) {
+                activitySelect.appendChild(option);
+            }
+            activitySelect.value = activityId;
+            
+            // Display selected activity
+            document.getElementById('selectedActivityName').textContent = name + ' (' + category + ')';
+            document.getElementById('selectedActivityDisplay').style.display = 'block';
+            document.getElementById('activitySearch').value = name;
+            document.getElementById('activitySearchResults').style.display = 'none';
+            
+            // Safely check the category radio button
+            const categoryRadio = document.querySelector(`input[name="activity_category"][value="${category}"]`);
+            if (categoryRadio) {
+                categoryRadio.checked = true;
+            }
+            
+            // Show and update calories preview
+            updateCaloriesEstimate();
+            console.log('Activity selected successfully');
+        }
+        
+        // Update calories estimate
+        function updateCaloriesEstimate() {
+            const activitySelect = document.getElementById('activitySelect');
+            const duration = parseFloat(document.getElementById('duration').value) || 30;
+            const caloriesPreview = document.getElementById('caloriesPreview');
+            
+            console.log('Updating calories estimate. Activity selected:', activitySelect.value, 'Duration:', duration);
+            
+            if (!activitySelect.value) {
+                console.log('No activity selected, hiding preview');
+                caloriesPreview.style.display = 'none';
+                return;
+            }
+            
+            const selectedOption = activitySelect.options[activitySelect.selectedIndex];
+            const caloriesPerMinute = parseFloat(selectedOption.getAttribute('data-calories-per-minute')) || 0;
+            const metValue = parseFloat(selectedOption.getAttribute('data-met-value')) || 1.0;
+            
+            console.log('Calories per minute:', caloriesPerMinute, 'MET value:', metValue);
+            
+            if (caloriesPerMinute > 0) {
+                // Use caloriesPerMinute from database (more accurate)
+                const calories = Math.round(caloriesPerMinute * duration);
+                document.getElementById('previewCalories').textContent = calories + ' kcal';
+                document.getElementById('previewPerMin').textContent = caloriesPerMinute.toFixed(1) + ' kcal/min';
+                console.log('Using caloriesPerMinute:', calories, 'total');
+            } else {
+                // Fallback: use MET value if caloriesPerMinute is not available
+                const userWeight = 70; // kg - default
+                const hours = duration / 60;
+                const calories = Math.round(metValue * userWeight * hours);
+                const perMin = (calories / duration).toFixed(1);
+                
+                document.getElementById('previewCalories').textContent = calories + ' kcal';
+                document.getElementById('previewPerMin').textContent = perMin + ' kcal/min';
+                console.log('Using MET value:', calories, 'total');
+            }
+            
+            caloriesPreview.style.display = 'block';
+            console.log('Preview should now be visible');
+        }
+        
+        // Duration controls
+        function increaseDuration() {
+            const input = document.getElementById('duration');
+            input.value = Math.min(parseInt(input.value) + 5, 480);
+            console.log('Duration increased to:', input.value);
+            updateCaloriesEstimate();
+        }
+        
+        function decreaseDuration() {
+            const input = document.getElementById('duration');
+            input.value = Math.max(parseInt(input.value) - 5, 1);
+            console.log('Duration decreased to:', input.value);
+            updateCaloriesEstimate();
+        }
+        
+        // Step control functions
+        function increaseSteps() {
+            const input = document.getElementById('steps');
+            input.value = Math.min(parseInt(input.value) + 500, 50000);
+            console.log('Steps increased to:', input.value);
+        }
+        
+        function decreaseSteps() {
+            const input = document.getElementById('steps');
+            input.value = Math.max(parseInt(input.value) - 500, 0);
+            console.log('Steps decreased to:', input.value);
+        }
+        
+        // Handle category change
+        function onCategoryChange() {
+            const category = document.querySelector('input[name="activity_category"]:checked')?.value || '';
+            
+            // Update visual feedback for selected category
+            document.querySelectorAll('.categoryLabel').forEach(label => {
+                const input = label.querySelector('input[type="radio"]');
+                const span = label.querySelector('span');
+                if (input.checked) {
+                    span.style.boxShadow = '0 4px 12px rgba(194, 65, 12, 0.4)';
+                    span.style.transform = 'scale(1.05)';
+                } else {
+                    span.style.boxShadow = 'none';
+                    span.style.transform = 'scale(1)';
+                }
+            });
+            
+            // Trigger activity search with the selected category
+            showInitialActivities();
+        }
+        
+        // Initialize category labels on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.categoryLabel').forEach(label => {
+                const input = label.querySelector('input[type="radio"]');
+                const span = label.querySelector('span');
+                if (input.checked) {
+                    span.style.boxShadow = '0 4px 12px rgba(194, 65, 12, 0.4)';
+                    span.style.transform = 'scale(1.05)';
+                }
+            });
+        });
+
+        // Set activity time to now
+        function setActivityNow() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('activity_time').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+        
+        // Toggle activity note
+        function toggleActivityNote(btn, note) {
+            btn.style.background = btn.style.background === 'rgb(255, 255, 255)' ? 'var(--accent)' : '#fff';
+            btn.style.color = btn.style.color === 'rgb(102, 102, 102)' ? '#FFFFFF' : '#666';
+            
+            const noteInput = document.getElementById('activityNotes');
+            if (noteInput.value.includes(note)) {
+                noteInput.value = noteInput.value.replace(note + ' ', '').replace(note, '');
+            } else {
+                noteInput.value = (noteInput.value ? noteInput.value + ' ' : '') + note;
+            }
+        }
+        
+        function addNotesLabel() {
+            // Notes updated
+        }
+        
+        // Modal functions
+        function openAddActivityModal() {
+            document.getElementById('addActivityModal').style.display = 'flex';
+        }
+        
+        function closeAddActivityModal() {
+            document.getElementById('addActivityModal').style.display = 'none';
+            document.getElementById('customActivityMessage').style.display = 'none';
+        }
+        
+        // Submit custom activity
+        function submitCustomActivity(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('customActivityName').value.trim();
+            const category = document.getElementById('customActivityCategory').value;
+            const intensity = document.querySelector('input[name="intensity"]:checked')?.value;
+            
+            console.log('Submitting activity:', { name, category, intensity });
+            
+            if (!name || !category || !intensity) {
+                showActivityMessage('Please fill all required fields', 'error');
+                return;
+            }
+            
+            fetch('/api/activities/add-custom', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, category, intensity })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('API Response:', data);
+                    if (data.success) {
+                        showActivityMessage(`✓ ${data.message}`, 'success');
+                        setTimeout(() => {
+                            const activitySelect = document.getElementById('activitySelect');
+                            const newOption = document.createElement('option');
+                            newOption.value = data.activityId;
+                            newOption.setAttribute('data-activity-name', name);
+                            newOption.setAttribute('data-category', category);
+                            newOption.setAttribute('data-met-value', data.metValue);
+                            newOption.setAttribute('data-calories-per-minute', data.caloriesPerMinute);
+                            newOption.textContent = name;
+                            activitySelect.appendChild(newOption);
+                            
+                            selectActivity(data.activityId, name, category, data.metValue, data.caloriesPerMinute);
+                            
+                            // Reset form
+                            document.getElementById('customActivityForm').reset();
+                            
+                            closeAddActivityModal();
+                        }, 1000);
+                    } else if (data.error && data.error.includes('already exists')) {
+                        showActivityMessage(`⚠️ Activity already exists! Using existing activity.`, 'info');
+                        setTimeout(() => {
+                            selectActivity(data.activityId, name, category, 6.0, 6.0);
+                            document.getElementById('customActivityForm').reset();
+                            closeAddActivityModal();
+                        }, 1000);
+                    } else {
+                        showActivityMessage(data.error || 'Failed to add activity', 'error');
+                        console.error('API Error:', data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Request error:', error);
+                    showActivityMessage('Network error: ' + error.message, 'error');
+                });
+        }
+        
+        // Show activity message
+        function showActivityMessage(msg, type) {
+            const msgDiv = document.getElementById('customActivityMessage');
+            msgDiv.textContent = msg;
+            msgDiv.style.background = type === 'error' ? '#ffe0e0' : type === 'success' ? '#e0ffe0' : '#ffe0b0';
+            msgDiv.style.color = type === 'error' ? '#cc0000' : type === 'success' ? '#006600' : '#996600';
+            msgDiv.style.display = 'block';
+        }
+        
+        // Update today's activity stats from the logs displayed
+        function updateActivityStats() {
+            try {
+                // Get all activity items from the display
+                const activityItems = document.querySelectorAll('[data-activity-log]');
+                
+                let totalCalories = 0;
+                let totalMinutes = 0;
+                let activityCount = 0;
+                
+                if (activityItems.length > 0) {
+                    activityItems.forEach(item => {
+                        const calories = parseFloat(item.getAttribute('data-calories')) || 0;
+                        const minutes = parseFloat(item.getAttribute('data-minutes')) || 0;
+                        
+                        totalCalories += calories;
+                        totalMinutes += minutes;
+                        activityCount += 1;
+                    });
+                }
+                
+                // Update display
+                const caloriesEl = document.getElementById('todayCalories');
+                const minutesEl = document.getElementById('todayMinutes');
+                const countEl = document.getElementById('todayCount');
+                
+                if (caloriesEl) caloriesEl.textContent = totalCalories + ' kcal';
+                if (minutesEl) minutesEl.textContent = totalMinutes + ' min';
+                if (countEl) countEl.textContent = activityCount + ' done';
+                
+                console.log(`Updated stats: ${totalCalories} kcal, ${totalMinutes} min, ${activityCount} activities`);
+            } catch (error) {
+                console.error('Error updating activity stats:', error);
+            }
+        }
+        
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#activitySearch') && !e.target.closest('#activitySearchResults')) {
+                document.getElementById('activitySearchResults').style.display = 'none';
+            }
+        });
+        
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('addActivityModal');
+            if (e.target === modal) {
+                closeAddActivityModal();
+            }
+        });
+        
+        // Set activity time on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setActivityNow();
+            updateActivityStats();  // Calculate and display today's stats
+        });
+    </script>

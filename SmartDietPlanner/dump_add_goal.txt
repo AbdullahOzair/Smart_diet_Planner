@@ -1,0 +1,97 @@
+<!-- Add/Update Goal View -->
+                {% if view == 'add_goal' %}
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">{% if existing_goal %}Update Your Goal{% else %}Create Your Goal{% endif %}</h1>
+                </div>
+                
+                {% if existing_goal %}
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Note:</strong> You can only have one active goal. Submitting this form will update your existing goal.
+                </div>
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card" style="box-shadow: var(--shadow-lg); border: none;">
+                            <div class="card-header" style="background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: white;">
+                                <h5 class="mb-0"><i class="bi bi-bullseye me-2"></i>{% if existing_goal %}Update{% else %}New{% endif %} Goal Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="{{ url_for('user_add_goal') }}">
+                                    <div class="mb-3">
+                                        <label for="goal_type" class="form-label fw-bold">Goal Type</label>
+                                        <select class="form-select" id="goal_type" name="goal_type" required>
+                                            <option value="">Select goal type...</option>
+                                            <option value="Weight Loss" {% if existing_goal and existing_goal[1] == 'Weight Loss' %}selected{% endif %}>Weight Loss</option>
+                                            <option value="Weight Gain" {% if existing_goal and existing_goal[1] == 'Weight Gain' %}selected{% endif %}>Weight Gain</option>
+                                            <option value="Maintain Weight" {% if existing_goal and existing_goal[1] == 'Maintain Weight' %}selected{% endif %}>Maintain Weight</option>
+                                            <option value="Muscle Building" {% if existing_goal and existing_goal[1] == 'Muscle Building' %}selected{% endif %}>Muscle Building</option>
+                                            <option value="Fitness" {% if existing_goal and existing_goal[1] == 'Fitness' %}selected{% endif %}>General Fitness</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="current_value" class="form-label fw-bold">Current Weight (kg)</label>
+                                            <input type="number" class="form-control" id="current_value" name="current_value" step="0.1" 
+                                                   value="{% if existing_goal %}{{ existing_goal[3] }}{% endif %}" required>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="target_value" class="form-label fw-bold">Target Weight (kg)</label>
+                                            <input type="number" class="form-control" id="target_value" name="target_value" step="0.1" 
+                                                   value="{% if existing_goal %}{{ existing_goal[2] }}{% endif %}" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="target_date" class="form-label fw-bold">Target Date</label>
+                                        <input type="date" class="form-control" id="target_date" name="target_date" 
+                                               value="{% if existing_goal %}{{ existing_goal[4] }}{% endif %}" required>
+                                        <small class="text-muted">Must be at least tomorrow's date</small>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-circle me-2"></i>{% if existing_goal %}Update Goal{% else %}Create Goal{% endif %}
+                                        </button>
+                                        <a href="{{ url_for('user_goals') }}" class="btn btn-secondary">
+                                            <i class="bi bi-x-circle me-2"></i>Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card" style="box-shadow: var(--shadow-md); border-left: 4px solid var(--accent);">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="bi bi-lightbulb me-2" style="color: var(--accent);"></i>Tips</h5>
+                                <ul class="mb-0">
+                                    <li>Set realistic and achievable goals</li>
+                                    <li>Track your progress regularly</li>
+                                    <li>Target date must be in the future</li>
+                                    <li>One goal at a time for better focus</li>
+                                    <li>Consult professionals for advice</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        {% if existing_goal %}
+                        <div class="card mt-3" style="box-shadow: var(--shadow-md); border-left: 4px solid var(--success);">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="bi bi-bullseye me-2" style="color: var(--success);"></i>Current Goal</h5>
+                                <p><strong>Type:</strong> {{ existing_goal[1] }}</p>
+                                <p><strong>Current:</strong> {{ existing_goal[3] }} kg</p>
+                                <p><strong>Target:</strong> {{ existing_goal[2] }} kg</p>
+                                <p><strong>Target Date:</strong> {{ existing_goal[4] }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                
