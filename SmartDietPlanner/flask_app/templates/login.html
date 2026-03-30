@@ -52,6 +52,18 @@
                         </div>
                     </div>
                     
+                    <div class="mb-4 d-flex justify-content-between align-items-center">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="remember_me" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">
+                                Remember me for 30 days
+                            </label>
+                        </div>
+                        <a href="{{ url_for('forgot_password') }}" class="forgot-password-link">
+                            <i class="bi bi-question-circle me-1"></i>Forgot Password?
+                        </a>
+                    </div>
+                    
                     <button type="submit" class="btn btn-primary w-100 mb-3">
                         <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
                     </button>
@@ -64,33 +76,7 @@
                     </a>
                 </div>
                 
-                <hr style="margin: 2rem 0; border-color: var(--border);">
                 
-                <div class="demo-credentials">
-                    <h6>
-                        <i class="bi bi-info-circle me-2"></i>Demo Credentials
-                    </h6>
-                    
-                    <div class="credential-box">
-                        <div class="credential-title">
-                            <i class="bi bi-shield-check me-2"></i>Admin Accounts
-                        </div>
-                        <div class="credential-details">
-                            <strong>Username:</strong> zainab_moazzam or abdullah_ozair<br>
-                            <strong>Password:</strong> admin
-                        </div>
-                    </div>
-                    
-                    <div class="credential-box">
-                        <div class="credential-title">
-                            <i class="bi bi-person-circle me-2"></i>User Account
-                        </div>
-                        <div class="credential-details">
-                            <strong>Username:</strong> john_doe<br>
-                            <strong>Password:</strong> admin
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -153,6 +139,65 @@
         
         .password-toggle i {
             font-size: 1rem;
+        }
+        
+        /* Remember Me Checkbox */
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-dark);
+            border-radius: 4px;
+            margin: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--stone-50);
+            accent-color: var(--accent);
+        }
+        
+        .form-check-input:hover {
+            border-color: var(--accent);
+        }
+        
+        .form-check-input:checked {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        
+        .form-check-label {
+            margin-bottom: 0;
+            cursor: pointer;
+            color: var(--charcoal-700);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        /* Forgot Password Link */
+        .forgot-password-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            white-space: nowrap;
+        }
+        
+        .forgot-password-link:hover {
+            color: var(--accent-hover);
+            transform: translateX(2px);
+        }
+        
+        .forgot-password-link i {
+            font-size: 0.875rem;
         }
         
         /* Demo Credentials Box - 3D Effect */

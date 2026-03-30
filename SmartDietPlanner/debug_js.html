@@ -1,0 +1,87 @@
+function editProfileSection(section) {
+        const modal = new bootstrap.Modal(document.getElementById('editModal'), {});
+        document.getElementById('editModalTitle').textContent = `Edit ${section}`;
+        
+        // Store the section name in a data attribute for later use
+        document.getElementById('editForm').dataset.section = section;
+        
+        let formFields = '';
+        
+        // Create specific form fields based on section with current values pre-filled
+        if (section === 'Personal Information') {
+            formFields = `
+                <div class="mb-3">
+                    <label for="firstName" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="firstName" name="first_name" placeholder="First Name" value="Test" required>
+                </div>
+                <div class="mb-3">
+                    <label for="lastName" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lastName" name="last_name" placeholder="Last Name" value="User" required>
+                </div>
+                <div class="mb-3">
+                    <label for="dob" class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control" id="dob" name="date_of_birth" value="1990-01-01" required>
+                </div>
+            `;
+        } else if (section === 'Body Metrics') {
+            formFields = `
+                <div class="mb-3">
+                    <label for="height" class="form-label">Height (cm)</label>
+                    <input type="number" class="form-control" id="height" name="height" placeholder="Height in cm" step="0.1" value="170.00" required>
+                </div>
+                <div class="mb-3">
+                    <label for="weight" class="form-label">Current Weight (kg)</label>
+                    <input type="number" class="form-control" id="weight" name="weight" placeholder="Current Weight" step="0.1" value="70.00" required>
+                </div>
+                <div class="mb-3">
+                    <label for="targetWeight" class="form-label">Target Weight (kg)</label>
+                    <input type="number" class="form-control" id="targetWeight" name="target_weight" placeholder="Target Weight" step="0.1" value="" required>
+                </div>
+            `;
+        } else if (section === 'Lifestyle') {
+            const currentLevel = "Active";
+            formFields = `
+                <div class="mb-3">
+                    <label for="activityLevel" class="form-label">Activity Level</label>
+                    <select class="form-control" id="activityLevel" name="activity_level" required>
+                        <option value="Sedentary" ${currentLevel === 'Sedentary' ? 'selected' : ''}>Sedentary</option>
+                        <option value="Light" ${currentLevel === 'Light' ? 'selected' : ''}>Light</option>
+                        <option value="Moderate" ${currentLevel === 'Moderate' ? 'selected' : ''}>Moderate</option>
+                        <option value="Active" ${currentLevel === 'Active' ? 'selected' : ''}>Active</option>
+                        <option value="Very Active" ${currentLevel === 'Very Active' ? 'selected' : ''}>Very Active</option>
+                    </select>
+                </div>
+            `;
+        } else if (section === 'Dietary Preferences') {
+            const currentDiet = "None";
+            formFields = `
+                <div class="mb-3">
+                    <label for="dietPref" class="form-label">Dietary Preference</label>
+                    <select class="form-control" id="dietPref" name="dietary_preference" required>
+                        <option value="Omnivore" ${currentDiet === 'Omnivore' ? 'selected' : ''}>Omnivore</option>
+                        <option value="Vegetarian" ${currentDiet === 'Vegetarian' ? 'selected' : ''}>Vegetarian</option>
+                        <option value="Vegan" ${currentDiet === 'Vegan' ? 'selected' : ''}>Vegan</option>
+                        <option value="Keto" ${currentDiet === 'Keto' ? 'selected' : ''}>Keto</option>
+                        <option value="Halal" ${currentDiet === 'Halal' ? 'selected' : ''}>Halal</option>
+                    </select>
+                </div>
+            `;
+        } else if (section === 'Health & Allergies') {
+            formFields = `
+                <div class="mb-3">
+                    <label for="allergies" class="form-label">Allergies (comma-separated)</label>
+                    <textarea class="form-control" id="allergies" name="allergies" placeholder="e.g., peanuts, dairy" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="healthCondition" class="form-label">Medical Conditions (comma-separated)</label>
+                    <textarea class="form-control" id="healthCondition" name="health_condition" placeholder="e.g., diabetes, hypertension" rows="2">None</textarea>
+                </div>
+            `;
+        }
+        
+        document.getElementById('editFormFields').innerHTML = formFields;
+        modal.show();
+    }
+    
+    // Save Profile Changes
+    

@@ -165,7 +165,7 @@
 ## Technical Details
 
 - **Framework:** Flask 3.0.0
-- **Database:** Oracle Database 21c (XEPDB1)
+- **Database:** PostgreSQL
 - **Frontend:** Bootstrap 5.3.0 + Custom CSS
 - **Python:** 3.13.1
 - **Port:** 5001 (Development Server)

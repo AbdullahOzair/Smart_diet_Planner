@@ -7,224 +7,1137 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-</head>
-<body>
-    <div class="login-container">
-        <div class="login-card fade-in" style="max-width: 680px;">
-            <div class="login-header">
-                <div class="login-icon">
-                    <i class="bi bi-person-plus-fill"></i>
-                </div>
-                <h2>Create Account</h2>
-                <p>Join Smart Diet Planner Today</p>
-            </div>
-            
-            <div class="login-body">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-                        <i class="bi bi-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }} me-2"></i>
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                    {% endfor %}
-                {% endif %}
-                {% endwith %}
-                
-                <form method="POST" action="{{ url_for('register') }}">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="username" class="form-label">
-                                <i class="bi bi-person me-2"></i>Username *
-                            </label>
-                            <input type="text" class="form-control" id="username" name="username" required>
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="email" class="form-label">
-                                <i class="bi bi-envelope me-2"></i>Email *
-                            </label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="password" class="form-label">
-                                <i class="bi bi-lock me-2"></i>Password *
-                            </label>
-                            <div class="password-input-wrapper">
-                                <input type="password" class="form-control" id="password" name="password" required>
-                                <button type="button" class="password-toggle" onclick="togglePassword('password', this)">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="confirm_password" class="form-label">
-                                <i class="bi bi-lock-fill me-2"></i>Confirm Password *
-                            </label>
-                            <div class="password-input-wrapper">
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                                <button type="button" class="password-toggle" onclick="togglePassword('confirm_password', this)">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                            
-                            <div class="row">
-                                <!-- First Name -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="first_name" class="form-label">First Name *</label>
-                                    <input type="text" class="form-control" id="first_name" name="first_name" required>
-                                </div>
-                                
-                                <!-- Last Name -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="last_name" class="form-label">Last Name *</label>
-                                    <input type="text" class="form-control" id="last_name" name="last_name" required>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <!-- Date of Birth -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="dob" class="form-label">Date of Birth *</label>
-                                    <input type="date" class="form-control" id="dob" name="dob" required>
-                                </div>
-                                
-                                <!-- Gender -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="gender" class="form-label">Gender *</label>
-                                    <select class="form-select" id="gender" name="gender" required>
-                                        <option value="">Select Gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <!-- Weight -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="weight" class="form-label">Weight (kg) *</label>
-                                    <input type="number" class="form-control" id="weight" name="weight" step="0.1" required>
-                                </div>
-                                
-                                <!-- Height -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="height" class="form-label">Height (cm) *</label>
-                                    <input type="number" class="form-control" id="height" name="height" step="0.1" required>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <!-- Activity Level -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="activity_level" class="form-label">Activity Level *</label>
-                                    <select class="form-select" id="activity_level" name="activity_level" required>
-                                        <option value="">Select Level</option>
-                                        <option value="Sedentary">Sedentary</option>
-                                        <option value="Light">Light</option>
-                                        <option value="Moderate">Moderate</option>
-                                        <option value="Active">Active</option>
-                                        <option value="Very Active">Very Active</option>
-                                    </select>
-                                </div>
-                                
-                                <!-- Dietary Preference -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="dietary_preference" class="form-label">Dietary Preference</label>
-                                    <input type="text" class="form-control" id="dietary_preference" name="dietary_preference" placeholder="e.g., Vegetarian">
-                                </div>
-                            </div>
-                            
-                            <!-- Health Condition -->
-                            <div class="mb-3">
-                                <label for="health_condition" class="form-label">Health Condition</label>
-                                <input type="text" class="form-control" id="health_condition" name="health_condition" placeholder="Any health conditions (optional)">
-                            </div>
-                    
-                    <button type="submit" class="btn btn-primary w-100 mb-3">
-                        <i class="bi bi-person-plus me-2"></i>Create Account
-                    </button>
-                    
-                    <div class="text-center">
-                        <p class="text-muted mb-0">Already have an account? 
-                            <a href="{{ url_for('login') }}" style="color: var(--accent); font-weight: 600;">Login here</a>
-                        </p>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function togglePassword(inputId, button) {
-            const input = document.getElementById(inputId);
-            const icon = button.querySelector('i');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('bi-eye');
-                icon.classList.add('bi-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('bi-eye-slash');
-                icon.classList.add('bi-eye');
-            }
-        }
-    </script>
     <style>
-        .fade-in {
-            animation: fadeIn 0.6s ease;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        @keyframes fadeIn {
+
+        body {
+            background: linear-gradient(135deg, #1c1917 0%, #292520 50%, #5d4037 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px 20px;
+        }
+
+        .register-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .register-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25), 0 10px 30px rgba(255, 140, 66, 0.2);
+            width: 100%;
+            max-width: 800px;
+            padding: 60px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
-        .password-input-wrapper {
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .register-header h1 {
+            color: #FF6B35;
+            font-size: 2.5em;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .register-header p {
+            color: #666;
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        /* Progress Indicator */
+        .progress-wrapper {
+            margin-bottom: 50px;
+        }
+
+        .progress-indicator {
+            display: flex;
+            justify-content: space-between;
             position: relative;
+            margin-bottom: 30px;
         }
-        
-        .password-input-wrapper .form-control {
-            padding-right: 3rem;
-        }
-        
-        .password-toggle {
+
+        .progress-indicator::before {
+            content: '';
             position: absolute;
-            right: 12px;
             top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #E0E0E0;
+            z-index: 1;
             transform: translateY(-50%);
+        }
+
+        .progress-bar-fill {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FF8C42, #FFA500);
+            z-index: 2;
+            transform: translateY(-50%);
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .step-dot {
+            width: 50px;
+            height: 50px;
+            background: #F5F5F5;
+            border: 3px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-weight: 700;
+            font-size: 1.2em;
+            z-index: 3;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-dot.active {
+            background: linear-gradient(135deg, #FF8C42, #FFA500);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 140, 66, 0.4);
+            transform: scale(1.1);
+        }
+
+        .step-dot.completed {
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .step-title {
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #FF6B35;
+            margin-bottom: 30px;
+        }
+
+        /* Step Containers */
+        .step-container {
+            display: none;
+        }
+
+        .step-container.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Form Controls */
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 1em;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #E8E8E8;
+            border-radius: 12px;
+            padding: 15px 18px;
+            font-size: 1em;
+            background-color: #FAFAFA;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #333;
+        }
+
+        .form-control::placeholder {
+            color: #BBB;
+            font-style: italic;
+        }
+
+        .form-control:hover, .form-select:hover {
+            border-color: #FF8C42;
+            background-color: #FFF;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 140, 66, 0.15);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #FF8C42 !important;
+            outline: none !important;
+            background-color: #FFF !important;
+            box-shadow: 0 0 0 5px rgba(255, 140, 66, 0.25) !important;
+            transform: translateY(-3px);
+        }
+
+        .mb-3 {
+            margin-bottom: 25px !important;
+        }
+
+        /* Selection Cards for Gender */
+        .selection-card {
+            border: 2px solid #E8E8E8;
+            border-radius: 14px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background-color: #FAFAFA;
+        }
+
+        .selection-card:hover {
+            border-color: #FF8C42;
+            background-color: #FFF8F5;
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(255, 140, 66, 0.2);
+        }
+
+        .hidden-radio {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .hidden-radio:checked + .selection-card {
+            border-color: #FF8C42;
+            background: linear-gradient(135deg, rgba(255, 140, 66, 0.1), rgba(255, 165, 0, 0.05));
+            box-shadow: 0 6px 20px rgba(255, 140, 66, 0.3), inset 0 0 0 2px #FF8C42;
+            transform: scale(1.02);
+        }
+
+        .selection-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #FF8C42;
+            transition: transform 0.3s ease;
+        }
+
+        .hidden-radio:checked + .selection-card .selection-icon {
+            transform: scale(1.2);
+        }
+
+        /* Button Group (Units) */
+        .btn-group {
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-check {
+            display: none;
+        }
+
+        .btn-outline-primary {
+            border: 2px solid #FF8C42;
+            color: #FF8C42;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #FFF8F5;
+            border-color: #FF6B35;
+        }
+
+        .btn-check:checked + .btn-outline-primary {
+            background-color: linear-gradient(135deg, #FF8C42, #FFA500);
+            border-color: #FF6B35;
+            color: white;
+        }
+
+        /* Error Messages */
+        .alert {
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 25px;
+            animation: slideInTop 0.3s ease-out;
+        }
+
+        @keyframes slideInTop {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-danger {
+            background-color: #FFE5E0;
+            color: #C62828;
+            border-left: 5px solid #FF6B35;
+        }
+
+        .alert-success {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .alert-info {
+            background-color: #E3F2FD;
+            color: #1565C0;
+            border-left: 5px solid #2196F3;
+        }
+
+        .alert-warning {
+            background-color: #FFF3E0;
+            color: #E65100;
+            border-left: 5px solid #FF8C42;
+        }
+
+        .alert .bi {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        /* Buttons */
+        .btn {
+            border-radius: 10px;
+            padding: 14px 28px;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FF8C42, #FFA500);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #FF6B35, #FF8C42);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 140, 66, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            color: white;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #45A049, #4CAF50);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-outline-secondary {
+            border: 2px solid #DDD;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            border-color: #FF8C42;
+            color: #FF8C42;
+            background-color: #FFF8F5;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #E8E8E8;
+        }
+
+        .button-container .btn {
+            flex: 1;
+        }
+
+        /* Footer Text */
+        .footer-text {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .footer-text a {
+            color: #FF8C42;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .footer-text a:hover {
+            color: #FF6B35;
+            text-decoration: underline;
+        }
+
+        /* Password Toggle */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper .form-control {
+            padding-right: 45px;
+            flex: 1;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 15px;
             background: none;
             border: none;
-            color: var(--charcoal-500);
+            color: #999;
             cursor: pointer;
-            padding: 0.5rem;
-            line-height: 1;
-            transition: color 0.2s;
+            font-size: 1.2em;
+            transition: all 0.2s ease;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-        .password-toggle:hover {
-            color: var(--accent);
+
+        .password-toggle-btn:hover {
+            color: #FF8C42;
+            transform: scale(1.1);
         }
-        
-        .password-toggle i {
-            font-size: 1rem;
+
+        .password-wrapper .form-control:focus + .password-toggle-btn {
+            color: #FF8C42;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .register-card {
+                padding: 40px 25px;
+            }
+
+            .register-header h1 {
+                font-size: 2em;
+            }
+
+            .step-dot {
+                width: 40px;
+                height: 40px;
+                font-size: 0.9em;
+            }
+
+            .selection-card {
+                padding: 15px;
+            }
         }
     </style>
+</head>
+<body>
+    <div class="register-wrapper">
+        <div class="register-card">
+            <div class="register-header">
+                <h1><i class="bi bi-person-heart"></i> Join Us</h1>
+                <p>Start Your Health Journey Today</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {% if category == 'error' %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-circle"></i>
+                                <strong>Oops!</strong> {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% elif category == 'success' %}
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="bi bi-check-circle"></i>
+                                <strong>Success!</strong> {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                <i class="bi bi-info-circle"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="progress-wrapper">
+                <div class="progress-indicator">
+                    <div class="progress-bar-fill" id="pb-fill" style="width: 0%;"></div>
+                    <div class="step-dot active" id="dot-1">1</div>
+                    <div class="step-dot" id="dot-2">2</div>
+                    <div class="step-dot" id="dot-3">3</div>
+                    <div class="step-dot" id="dot-4">4</div>
+                </div>
+                <div class="step-title" id="step-title">Step 1: Account Information</div>
+            </div>
+
+            <form action="{{ url_for('register') }}" method="POST" id="regForm">
+                
+                <!-- Step 1: Account -->
+                <div class="step-container active" id="step-1">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label"><i class="bi bi-person"></i> Username *</label>
+                            <input type="text" class="form-control" name="username" placeholder="Choose your username" required>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label"><i class="bi bi-envelope"></i> Email Address *</label>
+                            <input type="email" class="form-control" name="email" placeholder="your@email.com" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-lock"></i> Password *</label>
+                            <div class="password-wrapper">
+                                <input type="password" class="form-control" name="password" id="pass" placeholder="Min 6 characters" required minlength="6">
+                                <button type="button" class="password-toggle-btn" onclick="togglePassword('pass')">
+                                    <i class="bi bi-eye" id="pass-icon"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-lock-check"></i> Confirm Password *</label>
+                            <div class="password-wrapper">
+                                <input type="password" class="form-control" name="confirm_password" id="confirm_pass" placeholder="Repeat password" required minlength="6">
+                                <button type="button" class="password-toggle-btn" onclick="togglePassword('confirm_pass')">
+                                    <i class="bi bi-eye" id="confirm_pass-icon"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Personal -->
+                <div class="step-container" id="step-2">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-person-badge"></i> First Name *</label>
+                            <input type="text" class="form-control" name="first_name" placeholder="John" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-person-badge"></i> Last Name *</label>
+                            <input type="text" class="form-control" name="last_name" placeholder="Doe" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-calendar"></i> Date of Birth *</label>
+                            <input type="date" class="form-control" name="dob" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-globe"></i> Country</label>
+                            <select class="form-select" name="country">
+                                <option value="">Select your country...</option>
+                                <option value="Afghanistan">Afghanistan</option>
+                                <option value="Albania">Albania</option>
+                                <option value="Algeria">Algeria</option>
+                                <option value="Andorra">Andorra</option>
+                                <option value="Angola">Angola</option>
+                                <option value="Argentina">Argentina</option>
+                                <option value="Armenia">Armenia</option>
+                                <option value="Australia">Australia</option>
+                                <option value="Austria">Austria</option>
+                                <option value="Azerbaijan">Azerbaijan</option>
+                                <option value="Bahamas">Bahamas</option>
+                                <option value="Bahrain">Bahrain</option>
+                                <option value="Bangladesh">Bangladesh</option>
+                                <option value="Barbados">Barbados</option>
+                                <option value="Belarus">Belarus</option>
+                                <option value="Belgium">Belgium</option>
+                                <option value="Belize">Belize</option>
+                                <option value="Benin">Benin</option>
+                                <option value="Bhutan">Bhutan</option>
+                                <option value="Bolivia">Bolivia</option>
+                                <option value="Bosnia and Herzegovina">Bosnia and Herzegovina</option>
+                                <option value="Botswana">Botswana</option>
+                                <option value="Brazil">Brazil</option>
+                                <option value="Brunei">Brunei</option>
+                                <option value="Bulgaria">Bulgaria</option>
+                                <option value="Burkina Faso">Burkina Faso</option>
+                                <option value="Burundi">Burundi</option>
+                                <option value="Cambodia">Cambodia</option>
+                                <option value="Cameroon">Cameroon</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Cape Verde">Cape Verde</option>
+                                <option value="Central African Republic">Central African Republic</option>
+                                <option value="Chad">Chad</option>
+                                <option value="Chile">Chile</option>
+                                <option value="China">China</option>
+                                <option value="Colombia">Colombia</option>
+                                <option value="Comoros">Comoros</option>
+                                <option value="Congo">Congo</option>
+                                <option value="Costa Rica">Costa Rica</option>
+                                <option value="Croatia">Croatia</option>
+                                <option value="Cuba">Cuba</option>
+                                <option value="Cyprus">Cyprus</option>
+                                <option value="Czech Republic">Czech Republic</option>
+                                <option value="Denmark">Denmark</option>
+                                <option value="Djibouti">Djibouti</option>
+                                <option value="Dominica">Dominica</option>
+                                <option value="Dominican Republic">Dominican Republic</option>
+                                <option value="East Timor">East Timor</option>
+                                <option value="Ecuador">Ecuador</option>
+                                <option value="Egypt">Egypt</option>
+                                <option value="El Salvador">El Salvador</option>
+                                <option value="Equatorial Guinea">Equatorial Guinea</option>
+                                <option value="Eritrea">Eritrea</option>
+                                <option value="Estonia">Estonia</option>
+                                <option value="Eswatini">Eswatini</option>
+                                <option value="Ethiopia">Ethiopia</option>
+                                <option value="Fiji">Fiji</option>
+                                <option value="Finland">Finland</option>
+                                <option value="France">France</option>
+                                <option value="Gabon">Gabon</option>
+                                <option value="Gambia">Gambia</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Germany">Germany</option>
+                                <option value="Ghana">Ghana</option>
+                                <option value="Greece">Greece</option>
+                                <option value="Grenada">Grenada</option>
+                                <option value="Guatemala">Guatemala</option>
+                                <option value="Guinea">Guinea</option>
+                                <option value="Guinea-Bissau">Guinea-Bissau</option>
+                                <option value="Guyana">Guyana</option>
+                                <option value="Haiti">Haiti</option>
+                                <option value="Honduras">Honduras</option>
+                                <option value="Hungary">Hungary</option>
+                                <option value="Iceland">Iceland</option>
+                                <option value="India">India</option>
+                                <option value="Indonesia">Indonesia</option>
+                                <option value="Iran">Iran</option>
+                                <option value="Iraq">Iraq</option>
+                                <option value="Ireland">Ireland</option>
+                                <option value="Israel">Israel</option>
+                                <option value="Italy">Italy</option>
+                                <option value="Ivory Coast">Ivory Coast</option>
+                                <option value="Jamaica">Jamaica</option>
+                                <option value="Japan">Japan</option>
+                                <option value="Jordan">Jordan</option>
+                                <option value="Kazakhstan">Kazakhstan</option>
+                                <option value="Kenya">Kenya</option>
+                                <option value="Kiribati">Kiribati</option>
+                                <option value="Kosovo">Kosovo</option>
+                                <option value="Kuwait">Kuwait</option>
+                                <option value="Kyrgyzstan">Kyrgyzstan</option>
+                                <option value="Laos">Laos</option>
+                                <option value="Latvia">Latvia</option>
+                                <option value="Lebanon">Lebanon</option>
+                                <option value="Lesotho">Lesotho</option>
+                                <option value="Liberia">Liberia</option>
+                                <option value="Libya">Libya</option>
+                                <option value="Liechtenstein">Liechtenstein</option>
+                                <option value="Lithuania">Lithuania</option>
+                                <option value="Luxembourg">Luxembourg</option>
+                                <option value="Madagascar">Madagascar</option>
+                                <option value="Malawi">Malawi</option>
+                                <option value="Malaysia">Malaysia</option>
+                                <option value="Maldives">Maldives</option>
+                                <option value="Mali">Mali</option>
+                                <option value="Malta">Malta</option>
+                                <option value="Marshall Islands">Marshall Islands</option>
+                                <option value="Mauritania">Mauritania</option>
+                                <option value="Mauritius">Mauritius</option>
+                                <option value="Mexico">Mexico</option>
+                                <option value="Micronesia">Micronesia</option>
+                                <option value="Moldova">Moldova</option>
+                                <option value="Monaco">Monaco</option>
+                                <option value="Mongolia">Mongolia</option>
+                                <option value="Montenegro">Montenegro</option>
+                                <option value="Morocco">Morocco</option>
+                                <option value="Mozambique">Mozambique</option>
+                                <option value="Myanmar">Myanmar</option>
+                                <option value="Namibia">Namibia</option>
+                                <option value="Nauru">Nauru</option>
+                                <option value="Nepal">Nepal</option>
+                                <option value="Netherlands">Netherlands</option>
+                                <option value="New Zealand">New Zealand</option>
+                                <option value="Nicaragua">Nicaragua</option>
+                                <option value="Niger">Niger</option>
+                                <option value="Nigeria">Nigeria</option>
+                                <option value="North Korea">North Korea</option>
+                                <option value="North Macedonia">North Macedonia</option>
+                                <option value="Norway">Norway</option>
+                                <option value="Oman">Oman</option>
+                                <option value="Pakistan">Pakistan</option>
+                                <option value="Palau">Palau</option>
+                                <option value="Palestine">Palestine</option>
+                                <option value="Panama">Panama</option>
+                                <option value="Papua New Guinea">Papua New Guinea</option>
+                                <option value="Paraguay">Paraguay</option>
+                                <option value="Peru">Peru</option>
+                                <option value="Philippines">Philippines</option>
+                                <option value="Poland">Poland</option>
+                                <option value="Portugal">Portugal</option>
+                                <option value="Qatar">Qatar</option>
+                                <option value="Romania">Romania</option>
+                                <option value="Russia">Russia</option>
+                                <option value="Rwanda">Rwanda</option>
+                                <option value="Saint Kitts and Nevis">Saint Kitts and Nevis</option>
+                                <option value="Saint Lucia">Saint Lucia</option>
+                                <option value="Saint Vincent and the Grenadines">Saint Vincent and the Grenadines</option>
+                                <option value="Samoa">Samoa</option>
+                                <option value="San Marino">San Marino</option>
+                                <option value="Sao Tome and Principe">Sao Tome and Principe</option>
+                                <option value="Saudi Arabia">Saudi Arabia</option>
+                                <option value="Senegal">Senegal</option>
+                                <option value="Serbia">Serbia</option>
+                                <option value="Seychelles">Seychelles</option>
+                                <option value="Sierra Leone">Sierra Leone</option>
+                                <option value="Singapore">Singapore</option>
+                                <option value="Slovakia">Slovakia</option>
+                                <option value="Slovenia">Slovenia</option>
+                                <option value="Solomon Islands">Solomon Islands</option>
+                                <option value="Somalia">Somalia</option>
+                                <option value="South Africa">South Africa</option>
+                                <option value="South Korea">South Korea</option>
+                                <option value="South Sudan">South Sudan</option>
+                                <option value="Spain">Spain</option>
+                                <option value="Sri Lanka">Sri Lanka</option>
+                                <option value="Sudan">Sudan</option>
+                                <option value="Suriname">Suriname</option>
+                                <option value="Sweden">Sweden</option>
+                                <option value="Switzerland">Switzerland</option>
+                                <option value="Syria">Syria</option>
+                                <option value="Taiwan">Taiwan</option>
+                                <option value="Tajikistan">Tajikistan</option>
+                                <option value="Tanzania">Tanzania</option>
+                                <option value="Thailand">Thailand</option>
+                                <option value="Togo">Togo</option>
+                                <option value="Tonga">Tonga</option>
+                                <option value="Trinidad and Tobago">Trinidad and Tobago</option>
+                                <option value="Tunisia">Tunisia</option>
+                                <option value="Turkey">Turkey</option>
+                                <option value="Turkmenistan">Turkmenistan</option>
+                                <option value="Tuvalu">Tuvalu</option>
+                                <option value="Uganda">Uganda</option>
+                                <option value="Ukraine">Ukraine</option>
+                                <option value="United Arab Emirates">United Arab Emirates</option>
+                                <option value="United Kingdom">United Kingdom</option>
+                                <option value="United States">United States</option>
+                                <option value="Uruguay">Uruguay</option>
+                                <option value="Uzbekistan">Uzbekistan</option>
+                                <option value="Vanuatu">Vanuatu</option>
+                                <option value="Vatican City">Vatican City</option>
+                                <option value="Venezuela">Venezuela</option>
+                                <option value="Vietnam">Vietnam</option>
+                                <option value="Yemen">Yemen</option>
+                                <option value="Zambia">Zambia</option>
+                                <option value="Zimbabwe">Zimbabwe</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <label class="form-label d-block" style="margin-top: 20px;"><i class="bi bi-gender-ambiguous"></i> Gender *</label>
+                    <div class="row mb-3 gx-3">
+                        <div class="col-4">
+                            <input type="radio" name="gender" value="Male" id="g-male" class="hidden-radio" required>
+                            <label for="g-male" class="selection-card w-100">
+                                <i class="bi bi-gender-male selection-icon"></i><br><strong>Male</strong>
+                            </label>
+                        </div>
+                        <div class="col-4">
+                            <input type="radio" name="gender" value="Female" id="g-female" class="hidden-radio" required>
+                            <label for="g-female" class="selection-card w-100">
+                                <i class="bi bi-gender-female selection-icon"></i><br><strong>Female</strong>
+                            </label>
+                        </div>
+                        <div class="col-4">
+                            <input type="radio" name="gender" value="Other" id="g-other" class="hidden-radio" required>
+                            <label for="g-other" class="selection-card w-100">
+                                <i class="bi bi-gender-ambiguous selection-icon"></i><br><strong>Other</strong>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Body Metrics -->
+                <div class="step-container" id="step-3">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label d-block"><i class="bi bi-rulers"></i> Preferred Units</label>
+                            <div class="btn-group w-100 d-flex">
+                                <input type="radio" class="btn-check" name="units_preference" id="btn-metric" value="Metric" checked onchange="updateUnits()">
+                                <label class="btn btn-outline-primary flex-grow-1" for="btn-metric"><i class="bi bi-plus"></i> Metric (kg / cm)</label>
+
+                                <input type="radio" class="btn-check" name="units_preference" id="btn-imperial" value="Imperial" onchange="updateUnits()">
+                                <label class="btn btn-outline-primary flex-grow-1" for="btn-imperial"><i class="bi bi-plus"></i> Imperial (lbs / in)</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-weight"></i> Current Weight <span class="unit-w">(kg)</span> *</label>
+                            <input type="number" step="0.1" class="form-control weight-input" name="weight" placeholder="75" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-target"></i> Target Weight <span class="unit-w">(kg)</span> *</label>
+                            <input type="number" step="0.1" class="form-control" name="target_weight" placeholder="65" required>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label"><i class="bi bi-graph-up"></i> Height <span class="unit-h">(cm)</span> *</label>
+                            <input type="number" step="0.1" class="form-control height-input" name="height" placeholder="170" required oninput="calculateBMI()">
+                        </div>
+                    </div>
+
+                    <!-- BMI Display -->
+                    <div id="bmi-display" style="display: none; margin-top: 25px; padding: 20px; background: linear-gradient(135deg, rgba(255, 140, 66, 0.1), rgba(255, 165, 0, 0.05)); border-radius: 12px; border-left: 5px solid #FF8C42;">
+                        <div style="font-size: 1.3em; font-weight: 700; color: #333; margin-bottom: 5px;">
+                            Your BMI: <span id="bmi-value" style="color: #FF8C42; font-size: 1.5em;">--</span>
+                        </div>
+                        <div style="font-size: 1.1em; color: #333; font-weight: 600;">
+                            <span id="bmi-cat-icon" style="margin-right: 8px;">⭕</span><span id="bmi-cat" style="color: #FF8C42;">--</span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info" style="margin-top: 25px;">
+                        <i class="bi bi-lightbulb"></i> <strong>Pro Tip:</strong> These metrics help calculate your precise BMI and personalized calorie goals!
+                    </div>
+                </div>
+
+                <!-- Step 4: Lifestyle & Goals -->
+                <div class="step-container" id="step-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-bullseye"></i> Primary Goal *</label>
+                            <select class="form-select" name="goal" required>
+                                <option value="">Select your goal...</option>
+                                <option value="Lose Weight">Lose Weight</option>
+                                <option value="Gain Weight">Gain Weight</option>
+                                <option value="Build Muscle">Build Muscle</option>
+                                <option value="Maintain Weight">Maintain Weight</option>
+                                <option value="Improve Fitness">Improve Fitness</option>
+                                <option value="Increase Strength">Increase Strength</option>
+                                <option value="Improve Endurance">Improve Endurance</option>
+                                <option value="Healthy Lifestyle">Healthy Lifestyle</option>
+                                <option value="Medical Diet">Medical Diet</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-activity"></i> Activity Level *</label>
+                            <select class="form-select" name="activity_level" required>
+                                <option value="">Select activity level...</option>
+                                <option value="Sedentary">Sedentary (Little to no exercise)</option>
+                                <option value="Lightly Active">Lightly Active (1–3 days/week)</option>
+                                <option value="Moderately Active">Moderately Active (3–5 days/week)</option>
+                                <option value="Very Active">Very Active (6–7 days/week)</option>
+                                <option value="Extra Active">Extra Active (Athlete / Physical job)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-egg-fried"></i> Dietary Preference *</label>
+                            <select class="form-select" name="dietary_preference" required>
+                                <option value="None">No Preference</option>
+                                <option value="Vegetarian">Vegetarian</option>
+                                <option value="Vegan">Vegan</option>
+                                <option value="Keto">Keto</option>
+                                <option value="Low Carb">Low Carb</option>
+                                <option value="High Protein">High Protein</option>
+                                <option value="Mediterranean">Mediterranean</option>
+                                <option value="Halal">Halal</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-hospital"></i> Health Conditions</label>
+                            <select class="form-select" name="health_condition">
+                                <option value="None">None</option>
+                                <option value="Diabetes">Diabetes</option>
+                                <option value="High Blood Pressure">High Blood Pressure</option>
+                                <option value="Thyroid">Thyroid</option>
+                                <option value="Heart Disease">Heart Disease</option>
+                                <option value="PCOS">PCOS</option>
+                                <option value="High Cholesterol">High Cholesterol</option>
+                                <option value="Other">Other</option>
+                                <option value="Digestive_Issues">Digestive_Issues</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label"><i class="bi bi-exclamation-triangle"></i> Food Allergies</label>
+                            <input type="text" class="form-control" name="allergies" placeholder="e.g. Nuts, Dairy, Gluten (Optional)">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-speedometer2"></i> Fitness Goal Speed *</label>
+                            <select class="form-select" name="fitness_goal_speed" required>
+                                <option value="">Select your pace...</option>
+                                <option value="Slow & Healthy">Slow & Healthy (Sustainable)</option>
+                                <option value="Moderate">Moderate (Balanced)</option>
+                                <option value="Aggressive">Aggressive (Fast Results)</option>
+                            </select>
+                            <small style="color: #999; display: block; margin-top: 8px;"><i class="bi bi-info-circle"></i> This affects your calorie deficit</small>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-cup-straw"></i> Daily Water Goal (Optional)</label>
+                            <select class="form-select" name="daily_water_goal">
+                                <option value="">Select water intake...</option>
+                                <option value="1 L">1 L (4 glasses)</option>
+                                <option value="1.5 L">1.5 L (6 glasses)</option>
+                                <option value="2 L">2 L (8 glasses)</option>
+                                <option value="2.5 L">2.5 L (10 glasses)</option>
+                                <option value="3 L">3 L (12 glasses)</option>
+                                <option value="3.5 L">3.5 L (14 glasses)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-house-heart"></i> Cooking Preference *</label>
+                            <select class="form-select" name="cooking_preference" required>
+                                <option value="">Select preference...</option>
+                                <option value="Home Cooked">Home Cooked</option>
+                                <option value="Restaurant / Takeaway">Restaurant / Takeaway</option>
+                                <option value="Mixed">Mixed</option>
+                            </select>
+                            <small style="color: #999; display: block; margin-top: 8px;"><i class="bi bi-info-circle"></i> Helps generate realistic meal plans</small>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-moon-stars"></i> Sleep Hours per Night (Optional)</label>
+                            <select class="form-select" name="sleep_hours">
+                                <option value="">Select average hours...</option>
+                                <option value="<5 hours">Less than 5 hours</option>
+                                <option value="6 hours">6 hours</option>
+                                <option value="7 hours">7 hours</option>
+                                <option value="8+ hours">8 or more hours</option>
+                            </select>
+                            <small style="color: #999; display: block; margin-top: 8px;"><i class="bi bi-info-circle"></i> Sleep affects metabolism</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button type="button" class="btn btn-outline-secondary px-4" id="prevBtn" onclick="nextPrev(-1)" style="display:none;">
+                        <i class="bi bi-arrow-left me-2"></i>Back
+                    </button>
+                    <button type="button" class="btn btn-primary px-4" id="nextBtn" onclick="nextPrev(1)">
+                        Next<i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </div>
+                
+                <div class="footer-text">
+                    Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentTab = 0;
+        showTab(currentTab);
+
+        function showTab(n) {
+            let x = document.getElementsByClassName("step-container");
+            x[n].classList.remove("active");
+            x[n].style.display = "none";
+            x[n].classList.add("active");
+            x[n].style.display = "block";
+            
+            if (n == 0) {
+                document.getElementById("prevBtn").style.display = "none";
+            } else {
+                document.getElementById("prevBtn").style.display = "inline-flex";
+            }
+            
+            if (n == (x.length - 1)) {
+                document.getElementById("nextBtn").innerHTML = '<i class="bi bi-check-circle me-2"></i>Create Account';
+                document.getElementById("nextBtn").classList.remove("btn-primary");
+                document.getElementById("nextBtn").classList.add("btn-success");
+            } else {
+                document.getElementById("nextBtn").innerHTML = 'Next<i class="bi bi-arrow-right ms-2"></i>';
+                document.getElementById("nextBtn").classList.remove("btn-success");
+                document.getElementById("nextBtn").classList.add("btn-primary");
+            }
+            
+            updateProgress(n);
+        }
+
+        function updateProgress(n) {
+            let pbFill = document.getElementById("pb-fill");
+            pbFill.style.width = ((n) / 3) * 100 + "%";
+            
+            let titles = [
+                "Step 1: Account Information",
+                "Step 2: Tell Us About Yourself",
+                "Step 3: Body Metrics",
+                "Step 4: Lifestyle & Goals"
+            ];
+            document.getElementById("step-title").innerText = titles[n];
+
+            for (let i = 1; i <= 4; i++) {
+                let dot = document.getElementById("dot-" + i);
+                dot.className = "step-dot";
+                if (i < (n+1)) dot.className += " completed";
+                if (i === (n+1)) dot.className += " active";
+            }
+        }
+
+        function validateForm() {
+            let x = document.getElementsByClassName("step-container");
+            let fieldsToValidate = x[currentTab].querySelectorAll("input[required], select[required]");
+            
+            for(let field of fieldsToValidate) {
+                if(!field.checkValidity()) {
+                    field.reportValidity();
+                    return false;
+                }
+            }
+
+            if(currentTab === 0) {
+                let p1 = document.getElementById('pass').value.trim();
+                let p2 = document.getElementById('confirm_pass').value.trim();
+                
+                if(p1 !== p2) {
+                    showErrorAlert('Passwords do not match! Please try again.');
+                    document.getElementById('confirm_pass').focus();
+                    return false;
+                }
+                
+                if(p1.length < 6) {
+                    showErrorAlert('Password must be at least 6 characters long.');
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function showErrorAlert(message) {
+            let alertHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="bi bi-exclamation-circle"></i><strong>Error!</strong> ' + message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+            document.getElementById('regForm').insertAdjacentHTML('beforebegin', alertHtml);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                let alert = document.querySelector('.alert-danger');
+                if(alert) alert.remove();
+            }, 5000);
+        }
+
+        function nextPrev(n) {
+            let x = document.getElementsByClassName("step-container");
+            
+            if (n == 1 && !validateForm()) return false;
+            
+            x[currentTab].classList.remove("active");
+            currentTab = currentTab + n;
+            
+            if (currentTab >= x.length) {
+                document.getElementById("regForm").submit();
+                return false;
+            }
+            
+            showTab(currentTab);
+        }
+
+        function updateUnits() {
+            let isMetric = document.getElementById('btn-metric').checked;
+            document.querySelectorAll('.unit-w').forEach(el => el.innerHTML = isMetric ? "(kg)" : "(lbs)");
+            document.querySelectorAll('.unit-h').forEach(el => el.innerHTML = isMetric ? "(cm)" : "(in)");
+            calculateBMI();
+        }
+
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + '-icon');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+
+        function calculateBMI() {
+            let weight = parseFloat(document.querySelector('.weight-input').value);
+            let height = parseFloat(document.querySelector('.height-input').value);
+            let isMetric = document.getElementById('btn-metric').checked;
+
+            if (!weight || !height || weight <= 0 || height <= 0) {
+                document.getElementById('bmi-display').style.display = 'none';
+                return;
+            }
+
+            let bmi;
+            if (isMetric) {
+                // BMI = weight(kg) / (height(m))^2
+                bmi = weight / ((height / 100) * (height / 100));
+            } else {
+                // BMI = (weight(lbs) / (height(in))^2) * 703
+                bmi = (weight / (height * height)) * 703;
+            }
+
+            let category;
+            let categoryColor;
+            let icon;
+            if (bmi < 18.5) {
+                category = "Underweight";
+                categoryColor = "#2196F3";
+                icon = "📉";
+            } else if (bmi < 25) {
+                category = "Normal Weight";
+                categoryColor = "#4CAF50";
+                icon = "✅";
+            } else if (bmi < 30) {
+                category = "Overweight";
+                categoryColor = "#FF9800";
+                icon = "⚠️";
+            } else {
+                category = "Obese";
+                categoryColor = "#F44336";
+                icon = "❌";
+            }
+
+            document.getElementById('bmi-value').textContent = bmi.toFixed(1);
+            document.getElementById('bmi-cat').textContent = category;
+            document.getElementById('bmi-cat-icon').textContent = icon;
+            document.getElementById('bmi-cat').style.color = categoryColor;
+            document.getElementById('bmi-display').style.display = 'block';
+        }
+    </script>
 </body>
 </html>

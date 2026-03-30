@@ -80,7 +80,6 @@ Your application has been completely redesigned with a beautiful **Pastel Wellne
 - Table styling with gradients
 - Form control enhancements
 - Modal and badge styling
-- **Backup**: `style_old.css` (original preserved)
 
 ### 2. `flask_app/templates/login.html`
 - New centered card layout
@@ -88,7 +87,6 @@ Your application has been completely redesigned with a beautiful **Pastel Wellne
 - Demo credentials section with styled boxes
 - Registration link
 - Fade-in animation
-- **Backup**: `login_old.html` (original preserved)
 
 ### 3. `flask_app/templates/admin_dashboard.html`
 - Complete restructure
@@ -98,7 +96,6 @@ Your application has been completely redesigned with a beautiful **Pastel Wellne
 - Create user form
 - Update user form
 - Delete confirmation modals
-- **Backup**: `admin_dashboard_old.html` (original preserved)
 
 ### 4. `flask_app/app.py`
 - Added 5 new routes for user CRUD:
@@ -201,7 +198,7 @@ Your application has been completely redesigned with a beautiful **Pastel Wellne
 
 ## 📊 Database Integration
 
-All CRUD operations are fully integrated with your Oracle database:
+All CRUD operations are fully integrated with your PostgreSQL database:
 
 ### Create User
 ```sql
@@ -284,7 +281,7 @@ Consider adding these features:
 - Check browser console for errors
 
 ### CRUD Operations Not Working
-- Verify Oracle database connection
+- Verify PostgreSQL database connection
 - Check session is active (logged in as admin)
 - Review Flask terminal output for SQL errors
 - Ensure user_id in session matches admin user

@@ -1,0 +1,185 @@
+// prisma/schema.prisma
+
+generator client {
+  provider             = "prisma-client-py"
+  interface            = "sync"
+  enable_experimental_decimal = true
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id             Int           @id @default(autoincrement())
+  username            String        @unique @db.VarChar(50)
+  email               String        @unique @db.VarChar(100)
+  password_hash       String        @db.VarChar(255)
+  first_name          String?       @db.VarChar(50)
+  last_name           String?       @db.VarChar(50)
+  date_of_birth       DateTime?     @db.Date
+  gender              String?       @db.VarChar(10)
+  weight              Decimal?      @db.Decimal(5, 2)
+  height              Decimal?      @db.Decimal(5, 2)
+  activity_level      String?       @db.VarChar(20)
+  dietary_preference  String?       @db.VarChar(50)
+  health_condition    String?       @db.VarChar(255)
+  created_date        DateTime?     @default(now()) @db.Timestamp(6)
+  
+  goals               Goal[]
+  daily_logs          DailyLog[]
+  suggestions         Suggestion[]
+  reports             Report[]
+
+  @@map("users")
+}
+
+model Goal {
+  goal_id       Int       @id @default(autoincrement())
+  user_id       Int
+  goal_type     String    @db.VarChar(50)
+  target_value  Decimal?  @db.Decimal(6, 2)
+  current_value Decimal?  @db.Decimal(6, 2)
+  start_date    DateTime? @default(now()) @db.Date
+  target_date   DateTime? @db.Date
+  status        String?   @default("Active") @db.VarChar(20)
+  created_date  DateTime? @default(now()) @db.Timestamp(6)
+  
+  user          User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@map("goals")
+}
+
+model Meal {
+  meal_id       Int       @id @default(autoincrement())
+  meal_name     String    @unique @db.VarChar(100)
+  meal_category String?   @db.VarChar(50)
+  calories      Decimal?  @db.Decimal(6, 2)
+  protein       Decimal?  @default(0) @db.Decimal(6, 2)
+  carbohydrates Decimal?  @default(0) @db.Decimal(6, 2)
+  fats          Decimal?  @default(0) @db.Decimal(6, 2)
+  fiber         Decimal?  @default(0) @db.Decimal(6, 2)
+  serving_size  String?   @db.VarChar(50)
+  description   String?   @db.VarChar(255)
+  
+  meal_logs     MealLog[]
+
+  @@map("meals")
+}
+
+model Activity {
+  activity_id         Int       @id @default(autoincrement())
+  activity_name       String    @unique @db.VarChar(100)
+  activity_category   String?   @db.VarChar(50)
+  calories_per_minute Decimal?  @db.Decimal(5, 2)
+  intensity_level     String?   @db.VarChar(20)
+  description         String?   @db.VarChar(255)
+  
+  activity_logs       ActivityLog[]
+
+  @@map("activities")
+}
+
+model DailyLog {
+  daily_log_id             Int           @id @default(autoincrement())
+  user_id                  Int
+  log_date                 DateTime      @db.Date
+  total_calories_consumed  Decimal?      @default(0) @db.Decimal(6, 2)
+  total_calories_burned    Decimal?      @default(0) @db.Decimal(6, 2)
+  water_intake             Decimal?      @default(0) @db.Decimal(5, 2)
+  sleep_hours              Decimal?      @db.Decimal(4, 2)
+  weight                   Decimal?      @db.Decimal(5, 2)
+  notes                    String?       @db.VarChar(500)
+  created_date             DateTime?     @default(now()) @db.Timestamp(6)
+  
+  user                     User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  meal_logs                MealLog[]
+  activity_logs            ActivityLog[]
+  mood_logs                MoodLog[]
+
+  @@unique([user_id, log_date], map: "uq_daily_log_user_date")
+  @@map("daily_log")
+}
+
+model MealLog {
+  meal_log_id    Int       @id @default(autoincrement())
+  daily_log_id   Int
+  meal_id        Int
+  meal_time      DateTime? @default(now()) @db.Timestamp(6)
+  quantity       Decimal?  @default(1) @db.Decimal(6, 2)
+  total_calories Decimal?  @db.Decimal(6, 2)
+  notes          String?   @db.VarChar(255)
+  
+  daily_log      DailyLog  @relation(fields: [daily_log_id], references: [daily_log_id], onDelete: Cascade)
+  meal           Meal      @relation(fields: [meal_id], references: [meal_id])
+
+  @@map("meal_log")
+}
+
+model ActivityLog {
+  activity_log_id  Int       @id @default(autoincrement())
+  daily_log_id     Int
+  activity_id      Int
+  duration_minutes Decimal   @db.Decimal(6, 2)
+  calories_burned  Decimal?  @db.Decimal(6, 2)
+  activity_time    DateTime? @default(now()) @db.Timestamp(6)
+  notes            String?   @db.VarChar(255)
+  
+  daily_log        DailyLog  @relation(fields: [daily_log_id], references: [daily_log_id], onDelete: Cascade)
+  activity         Activity  @relation(fields: [activity_id], references: [activity_id])
+
+  @@map("activity_log")
+}
+
+model MoodLog {
+  mood_log_id  Int       @id @default(autoincrement())
+  daily_log_id Int
+  mood_rating  Int       @db.SmallInt
+  stress_level String?   @db.VarChar(20)
+  energy_level String?   @db.VarChar(20)
+  notes        String?   @db.VarChar(500)
+  log_time     DateTime? @default(now()) @db.Timestamp(6)
+  
+  daily_log    DailyLog  @relation(fields: [daily_log_id], references: [daily_log_id], onDelete: Cascade)
+
+  @@map("mood_log")
+}
+
+model Suggestion {
+  suggestion_id          Int       @id @default(autoincrement())
+  user_id                Int
+  suggestion_type        String    @db.VarChar(50)
+  suggestion_text        String    @db.VarChar(1000)
+  reasoning              String?   @db.VarChar(1000)
+  reasoning_explanation  String?   @db.VarChar(4000)
+  ai_confidence          Decimal?  @db.Decimal(3, 2)
+  reasoning_type         String?   @db.VarChar(100)
+  priority               String?   @default("Medium") @db.VarChar(20)
+  status                 String?   @default("Pending") @db.VarChar(20)
+  created_date           DateTime? @default(now()) @db.Timestamp(6)
+  
+  user                   User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@map("suggestions")
+}
+
+model Report {
+  report_id               Int       @id @default(autoincrement())
+  user_id                 Int
+  report_type             String    @db.VarChar(50)
+  report_period_start     DateTime  @db.Date
+  report_period_end       DateTime  @db.Date
+  total_calories_consumed Decimal?  @db.Decimal(8, 2)
+  total_calories_burned   Decimal?  @db.Decimal(8, 2)
+  average_weight          Decimal?  @db.Decimal(5, 2)
+  weight_change           Decimal?  @db.Decimal(5, 2)
+  goals_achieved          Int?      @db.SmallInt
+  report_summary          String?   @db.VarChar(2000)
+  generated_date          DateTime? @default(now()) @db.Timestamp(6)
+  
+  user                    User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@map("reports")
+}
+

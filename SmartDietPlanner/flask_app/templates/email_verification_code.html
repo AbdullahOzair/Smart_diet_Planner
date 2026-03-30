@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset Code - Smart Diet & Lifestyle Planner</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f5f5f4;">
+    <!-- Wrapper -->
+    <div style="background-color: #f5f5f4; padding: 40px 20px; text-align: center;">
+        <!-- Main Container -->
+        <table style="max-width: 600px; margin: 0 auto; background-color: #fafaf9; border: 1px solid #e7e5e4; border-radius: 12px; box-shadow: 0 4px 6px rgba(28, 25, 23, 0.1);" width="600" cellpadding="0" cellspacing="0">
+            
+            <!-- Header with Gradient -->
+            <tr>
+                <td style="background: linear-gradient(135deg, #1c1917 0%, #292524 100%); padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0; position: relative; overflow: hidden;">
+                    <!-- Decorative background circle -->
+                    <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background-color: rgba(194, 65, 12, 0.1); border-radius: 50%; pointer-events: none;"></div>
+                    
+                    <!-- Icon -->
+                    <div style="position: relative; display: inline-block; width: 64px; height: 64px; background: linear-gradient(135deg, #C2410C, #EA580C); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; box-shadow: 0 4px 14px rgba(194, 65, 12, 0.35);">
+                        <span style="font-size: 32px; color: #fff;">🔐</span>
+                    </div>
+                    
+                    <!-- Header Text -->
+                    <h1 style="color: #ffffff; font-size: 28px; font-weight: 800; margin: 10px 0 5px 0; letter-spacing: -0.01em; position: relative;">Password Reset Code</h1>
+                    <p style="color: #d6d3d1; font-size: 14px; margin: 0; position: relative;">Secure your Smart Diet & Lifestyle Planner account</p>
+                </td>
+            </tr>
+            
+            <!-- Body Content -->
+            <tr>
+                <td style="padding: 50px 30px; text-align: center;">
+                    
+                    <!-- Welcome Message -->
+                    <p style="color: #44403c; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+                        Hi <strong>{{ first_name }}</strong>,
+                    </p>
+                    
+                    <p style="color: #57534e; font-size: 15px; line-height: 1.8; margin: 0 0 40px 0;">
+                        We received a request to reset your password. To proceed, please use the verification code below. <strong>This code expires in 10 minutes.</strong>
+                    </p>
+                    
+                    <!-- Verification Code Box -->
+                    <div style="background: linear-gradient(135deg, #FFEDD5 0%, rgba(194, 65, 12, 0.05) 100%); border-left: 4px solid #C2410C; border-radius: 8px; padding: 30px; margin: 0 0 40px 0; text-align: center;">
+                        <p style="color: #57534e; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 15px 0; font-weight: 600;">Your Verification Code</p>
+                        <div style="background-color: #fafaf9; border: 2px dashed #C2410C; border-radius: 6px; padding: 20px; margin: 0;">
+                            <span style="color: #C2410C; font-size: 48px; font-weight: 800; letter-spacing: 8px; font-family: 'Courier New', monospace;">{{ code }}</span>
+                        </div>
+                        <p style="color: #78716c; font-size: 12px; margin: 15px 0 0 0;">
+                            ⏱️ Valid for 10 minutes only
+                        </p>
+                    </div>
+                    
+                    <!-- Instructions -->
+                    <div style="background-color: #f5f5f4; border: 1px solid #e7e5e4; border-radius: 8px; padding: 20px; margin: 0 0 30px 0; text-align: left;">
+                        <p style="color: #44403c; font-size: 14px; font-weight: 600; margin: 0 0 10px 0;">📋 Next Steps:</p>
+                        <ol style="color: #57534e; font-size: 14px; line-height: 1.8; padding-left: 20px; margin: 0;">
+                            <li>Copy the verification code above</li>
+                            <li>Go back to the password reset page</li>
+                            <li>Paste the code and press "Verify Code"</li>
+                            <li>Create your new password</li>
+                            <li>Login with your new credentials</li>
+                        </ol>
+                    </div>
+                    
+                    <!-- Security Notice -->
+                    <div style="background-color: #fee2e2; border-left: 4px solid #B91C1C; border-radius: 6px; padding: 15px; margin: 0 0 30px 0; text-align: left;">
+                        <p style="color: #7F1D1D; font-size: 13px; margin: 0;">
+                            <strong>🛡️ Security Note:</strong> If you didn't request this code, please ignore this email. Your account is secure.
+                        </p>
+                    </div>
+                    
+                    <!-- Recovery Methods Info -->
+                    <p style="color: #57534e; font-size: 13px; line-height: 1.6; margin: 0;">
+                        Recovery method used: <strong>{{ recovery_method }}</strong>
+                    </p>
+                    
+                </td>
+            </tr>
+            
+            <!-- Action Button Section -->
+            <tr>
+                <td style="padding: 30px; text-align: center;">
+                    <a href="{{ reset_link }}" style="display: inline-block; background: linear-gradient(135deg, #C2410C, #EA580C); color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 15px; transition: all 0.2s ease; box-shadow: 0 4px 14px rgba(194, 65, 12, 0.35);">
+                        🔐 Go to Password Reset
+                    </a>
+                </td>
+            </tr>
+            
+            <!-- Divider -->
+            <tr>
+                <td style="padding: 0 30px;">
+                    <div style="height: 1px; background-color: #e7e5e4; margin: 0;"></div>
+                </td>
+            </tr>
+            
+            <!-- Footer -->
+            <tr>
+                <td style="padding: 30px; text-align: center; background-color: #f5f5f4; border-radius: 0 0 12px 12px;">
+                    <!-- App Info -->
+                    <p style="color: #78716c; font-size: 12px; margin: 0 0 15px 0;">
+                        <strong style="color: #C2410C;">Smart Diet & Lifestyle Planner</strong><br>
+                        Your personal health and fitness companion
+                    </p>
+                    
+                    <!-- Help Links -->
+                    <div style="margin: 15px 0;">
+                        <a href="http://localhost:4001" style="color: #C2410C; text-decoration: none; font-size: 12px; margin: 0 10px;">Dashboard</a>
+                        <span style="color: #d6d3d1;">•</span>
+                        <a href="http://localhost:4001/help" style="color: #C2410C; text-decoration: none; font-size: 12px; margin: 0 10px;">Help</a>
+                        <span style="color: #d6d3d1;">•</span>
+                        <a href="http://localhost:4001/contact" style="color: #C2410C; text-decoration: none; font-size: 12px; margin: 0 10px;">Contact</a>
+                    </div>
+                    
+                    <!-- Legal -->
+                    <p style="color: #a8a29e; font-size: 11px; margin: 20px 0 0 0; line-height: 1.6;">
+                        This is an automated email. Please do not reply to this message.<br>
+                        © 2026 Smart Diet & Lifestyle Planner. All rights reserved.
+                    </p>
+                </td>
+            </tr>
+            
+        </table>
+    </div>
+</body>
+</html>
