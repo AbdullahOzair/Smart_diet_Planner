@@ -478,29 +478,27 @@
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        {% if category == 'error' %}
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <i class="bi bi-exclamation-circle"></i>
-                                <strong>Oops!</strong> {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% elif category == 'success' %}
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <i class="bi bi-check-circle"></i>
-                                <strong>Success!</strong> {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% else %}
-                            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                                <i class="bi bi-info-circle"></i>
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
+            {% if messages %}
+            <div class="toast-wrapper" id="sdpToasts">
+                {% for category, message in messages %}
+                {% set c = 'error' if category in ('error','danger') else category %}
+                {% set icon = 'check-circle-fill' if c == 'success' else ('x-circle-fill' if c == 'error' else ('exclamation-triangle-fill' if c == 'warning' else 'info-circle-fill')) %}
+                {% set label = 'Success' if c == 'success' else ('Error' if c == 'error' else ('Warning' if c == 'warning' else 'Notice')) %}
+                <div class="toast-msg toast-{{ c }}">
+                    <div class="toast-icon"><i class="bi bi-{{ icon }}"></i></div>
+                    <div style="flex:1;min-width:0;">
+                        <span class="toast-cat">{{ label }}</span>
+                        <span class="toast-text">{{ message }}</span>
+                    </div>
+                    <button class="toast-close" onclick="sdpDismiss(this.closest('.toast-msg'))"><i class="bi bi-x-lg"></i></button>
+                </div>
+                {% endfor %}
+            </div>
+            <script>
+            function sdpDismiss(el){el.classList.add('sdp-dismissing');setTimeout(function(){el.remove();},360);}
+            document.querySelectorAll('.toast-msg').forEach(function(t,i){setTimeout(function(){sdpDismiss(t);},4500+i*600);});
+            </script>
+            {% endif %}
             {% endwith %}
 
             <div class="progress-wrapper">
@@ -1044,14 +1042,20 @@
         }
 
         function showErrorAlert(message) {
-            let alertHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="bi bi-exclamation-circle"></i><strong>Error!</strong> ' + message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
-            document.getElementById('regForm').insertAdjacentHTML('beforebegin', alertHtml);
-            
-            // Auto-dismiss after 5 seconds
-            setTimeout(() => {
-                let alert = document.querySelector('.alert-danger');
-                if(alert) alert.remove();
-            }, 5000);
+            let wrapper = document.getElementById('sdpToasts');
+            if (!wrapper) {
+                wrapper = document.createElement('div');
+                wrapper.className = 'toast-wrapper';
+                wrapper.id = 'sdpToasts';
+                document.body.appendChild(wrapper);
+            }
+            let toast = document.createElement('div');
+            toast.className = 'toast-msg toast-error';
+            toast.innerHTML = '<div class="toast-icon"><i class="bi bi-x-circle-fill"></i></div>'
+                + '<div style="flex:1;min-width:0;"><span class="toast-cat">Error</span><span class="toast-text">' + message + '</span></div>'
+                + '<button class="toast-close" onclick="sdpDismiss(this.closest(\'.toast-msg\'))"><i class="bi bi-x-lg"></i></button>';
+            wrapper.appendChild(toast);
+            setTimeout(function(){ sdpDismiss(toast); }, 4500);
         }
 
         function nextPrev(n) {

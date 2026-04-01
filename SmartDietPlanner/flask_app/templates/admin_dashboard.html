@@ -3,1432 +3,1954 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Smart Diet & Lifestyle Planner</title>
+    <title>Admin Panel — Smart Diet Planner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --accent:     #f97316;
+            --accent-d:   #ea580c;
+            --accent-l:   #fff7ed;
+            --success:    #22c55e;
+            --success-l:  #f0fdf4;
+            --info:       #3b82f6;
+            --info-l:     #eff6ff;
+            --warning:    #f59e0b;
+            --warning-l:  #fffbeb;
+            --danger:     #ef4444;
+            --danger-l:   #fef2f2;
+            --purple:     #8b5cf6;
+            --purple-l:   #f5f3ff;
+            --teal:       #14b8a6;
+            --teal-l:     #f0fdfa;
+            --sidebar-bg: #0f172a;
+            --sidebar-w:  242px;
+            --topbar-h:   60px;
+            --bg:         #f1f5f9;
+            --card:       #ffffff;
+            --border:     #e2e8f0;
+            --text:       #0f172a;
+            --text-2:     #475569;
+            --text-3:     #94a3b8;
+            --radius:     14px;
+            --shadow:     0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+            --shadow-md:  0 4px 8px rgba(0,0,0,.08), 0 12px 28px rgba(0,0,0,.06);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg); color: var(--text); font-size: 14px;
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* ══ TOPBAR ══════════════════════════════════════════════ */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            height: var(--topbar-h); background: var(--sidebar-bg);
+            display: flex; align-items: center; padding: 0 1.5rem; gap: .875rem;
+            box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 4px 16px rgba(0,0,0,.3);
+        }
+        .tb-brand {
+            display: flex; align-items: center; gap: .55rem;
+            text-decoration: none; font-weight: 700; font-size: .95rem; color: #fff;
+        }
+        .tb-brand-icon {
+            width: 34px; height: 34px; background: var(--accent);
+            border-radius: 9px; display: flex; align-items: center;
+            justify-content: center; font-size: 1rem; flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(249,115,22,.45);
+        }
+        .tb-admin-badge {
+            font-size: .6rem; font-weight: 700;
+            background: rgba(249,115,22,.15); color: var(--accent);
+            border: 1px solid rgba(249,115,22,.3); padding: .18rem .6rem;
+            border-radius: 5px; text-transform: uppercase; letter-spacing: .1em;
+        }
+        .tb-right { margin-left: auto; display: flex; align-items: center; gap: .75rem; }
+        .tb-user {
+            display: flex; align-items: center; gap: .5rem;
+            background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.09);
+            border-radius: 9px; padding: .35rem .85rem;
+        }
+        .tb-avatar {
+            width: 27px; height: 27px; background: var(--accent);
+            border-radius: 7px; display: flex; align-items: center;
+            justify-content: center; font-size: .72rem; font-weight: 700; color: #fff;
+        }
+        .tb-user span { font-size: .78rem; color: #cbd5e1; font-weight: 500; }
+        .tb-logout {
+            display: flex; align-items: center; gap: .4rem; text-decoration: none;
+            padding: .35rem .85rem; border-radius: 9px;
+            background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2);
+            color: #fca5a5; font-size: .78rem; font-weight: 600; transition: all .2s;
+        }
+        .tb-logout:hover { background: rgba(239,68,68,.2); color: #fecaca; border-color: rgba(239,68,68,.35); }
+
+        /* ══ SIDEBAR ═════════════════════════════════════════════ */
+        .sidebar {
+            position: fixed; top: var(--topbar-h); left: 0; bottom: 0; z-index: 900;
+            width: var(--sidebar-w); background: var(--sidebar-bg);
+            overflow-y: auto; overflow-x: hidden;
+            border-right: 1px solid rgba(255,255,255,.04);
+            padding-bottom: 2rem;
+        }
+        .sidebar::-webkit-scrollbar { width: 3px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); }
+        .sb-section {
+            font-size: .62rem; font-weight: 700; color: #334155;
+            text-transform: uppercase; letter-spacing: .13em;
+            padding: 1.1rem 1.25rem .35rem;
+        }
+        .sb-link {
+            display: flex; align-items: center; gap: .65rem;
+            padding: .58rem 1rem; margin: .08rem .75rem;
+            border-radius: 9px; color: #64748b; font-size: .8rem; font-weight: 500;
+            text-decoration: none; transition: all .18s; position: relative;
+        }
+        .sb-link:hover { background: rgba(255,255,255,.06); color: #cbd5e1; }
+        .sb-link.active {
+            background: rgba(249,115,22,.14);
+            color: var(--accent); font-weight: 600;
+        }
+        .sb-link.active::before {
+            content: ''; position: absolute; left: -12px; top: 50%;
+            transform: translateY(-50%); width: 3px; height: 18px;
+            background: var(--accent); border-radius: 0 3px 3px 0;
+        }
+        .sb-link i { font-size: .9rem; width: 18px; text-align: center; flex-shrink: 0; }
+        .sb-hr { border: none; border-top: 1px solid rgba(255,255,255,.05); margin: .45rem 1.25rem; }
+
+        /* ══ MAIN ════════════════════════════════════════════════ */
+        .main {
+            margin-left: var(--sidebar-w); margin-top: var(--topbar-h);
+            padding: 1.75rem 2rem; min-height: calc(100vh - var(--topbar-h));
+        }
+
+        /* ══ PAGE HEADER ══════════════════════════════════════════ */
+        .pg-head {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: 1rem; margin-bottom: 1.75rem;
+        }
+        .pg-head-text h1 {
+            font-size: 1.3rem; font-weight: 700; color: var(--text);
+            display: flex; align-items: center; gap: .5rem; margin: 0;
+        }
+        .ph-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: var(--accent-l); color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: .92rem; flex-shrink: 0;
+        }
+        .pg-head-text p { font-size: .77rem; color: var(--text-3); margin: .35rem 0 0 46px; }
+
+        /* ══ STAT CARDS ══════════════════════════════════════════ */
+        .sc {
+            background: var(--card); border-radius: var(--radius);
+            border: 1px solid var(--border); box-shadow: var(--shadow);
+            padding: 1.2rem; display: flex; align-items: flex-start; gap: 1rem;
+            transition: box-shadow .2s, transform .2s; height: 100%;
+        }
+        .sc:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .sc-icon {
+            width: 46px; height: 46px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; flex-shrink: 0;
+        }
+        .sc-body { flex: 1; min-width: 0; }
+        .sc-label {
+            font-size: .65rem; font-weight: 700; color: var(--text-3);
+            text-transform: uppercase; letter-spacing: .08em; margin-bottom: .1rem;
+        }
+        .sc-value { font-size: 1.9rem; font-weight: 800; color: var(--text); line-height: 1.05; }
+        .sc-sub { font-size: .68rem; color: var(--text-3); margin-top: .2rem; }
+
+        .ic-orange { background: var(--accent-l); color: var(--accent); }
+        .ic-blue   { background: var(--info-l);   color: var(--info); }
+        .ic-green  { background: var(--success-l);color: var(--success); }
+        .ic-amber  { background: var(--warning-l);color: var(--warning); }
+        .ic-red    { background: var(--danger-l); color: var(--danger); }
+        .ic-purple { background: var(--purple-l); color: var(--purple); }
+        .ic-teal   { background: var(--teal-l);   color: var(--teal); }
+
+        /* ══ CARDS ═══════════════════════════════════════════════ */
+        .acard {
+            background: var(--card); border-radius: var(--radius);
+            border: 1px solid var(--border); box-shadow: var(--shadow);
+            overflow: hidden; margin-bottom: 1.25rem;
+        }
+        .acard-head {
+            padding: .95rem 1.25rem; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .acard-head h6 {
+            font-size: .88rem; font-weight: 700; color: var(--text);
+            display: flex; align-items: center; gap: .5rem; margin: 0;
+        }
+        .ch-icon {
+            width: 27px; height: 27px; border-radius: 7px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: .78rem; flex-shrink: 0;
+        }
+        .acard-body { padding: 1.25rem; }
+
+        /* ══ TABLES ══════════════════════════════════════════════ */
+        .atable { width: 100%; border-collapse: collapse; font-size: .81rem; }
+        .atable thead th {
+            font-size: .66rem; font-weight: 700; color: var(--text-3);
+            text-transform: uppercase; letter-spacing: .07em;
+            padding: .8rem 1.1rem; background: #f8fafc;
+            border-bottom: 1px solid var(--border); white-space: nowrap;
+        }
+        .atable tbody td {
+            padding: .85rem 1.1rem; border-bottom: 1px solid #f1f5f9;
+            color: var(--text-2); vertical-align: middle;
+        }
+        .atable tbody tr:last-child td { border-bottom: none; }
+        .atable tbody tr { transition: background .15s; }
+        .atable tbody tr:hover td { background: #f8fafc; }
+        .col-id  { color: var(--text-3) !important; font-size: .75rem !important; }
+        .col-name { font-weight: 600; color: var(--text) !important; }
+
+        /* ══ BADGES ══════════════════════════════════════════════ */
+        .pill {
+            display: inline-flex; align-items: center; gap: .25rem;
+            font-size: .67rem; font-weight: 600;
+            padding: .22rem .65rem; border-radius: 20px; white-space: nowrap;
+        }
+        .p-orange { background: var(--accent-l); color: var(--accent-d);  border: 1px solid #fed7aa; }
+        .p-blue   { background: var(--info-l);   color: #1d4ed8;          border: 1px solid #bfdbfe; }
+        .p-green  { background: var(--success-l);color: #15803d;          border: 1px solid #bbf7d0; }
+        .p-amber  { background: var(--warning-l);color: #b45309;          border: 1px solid #fde68a; }
+        .p-red    { background: var(--danger-l); color: #b91c1c;          border: 1px solid #fecaca; }
+        .p-gray   { background: #f1f5f9;         color: #475569;          border: 1px solid #e2e8f0; }
+        .p-purple { background: var(--purple-l); color: #6d28d9;          border: 1px solid #ddd6fe; }
+        .p-teal   { background: var(--teal-l);   color: #0f766e;          border: 1px solid #99f6e4; }
+
+        /* ══ BUTTONS ═════════════════════════════════════════════ */
+        .btn-ac {
+            background: var(--accent); color: #fff; border: none;
+            border-radius: 9px; padding: .5rem 1.1rem;
+            font-size: .82rem; font-weight: 600;
+            display: inline-flex; align-items: center; gap: .4rem;
+            text-decoration: none; cursor: pointer;
+            transition: background .18s, box-shadow .18s;
+            box-shadow: 0 2px 8px rgba(249,115,22,.28);
+            font-family: inherit;
+        }
+        .btn-ac:hover { background: var(--accent-d); color: #fff; box-shadow: 0 4px 14px rgba(249,115,22,.38); }
+        .btn-ac.btn-danger { background: var(--danger); box-shadow: 0 2px 6px rgba(239,68,68,.3); }
+        .btn-ac.btn-danger:hover { background: #dc2626; box-shadow: 0 4px 12px rgba(239,68,68,.4); }
+        .btn-out {
+            background: var(--card); color: var(--text-2);
+            border: 1px solid var(--border); border-radius: 9px;
+            padding: .5rem 1.1rem; font-size: .82rem; font-weight: 600;
+            display: inline-flex; align-items: center; gap: .4rem;
+            text-decoration: none; cursor: pointer; transition: all .18s;
+            font-family: inherit;
+        }
+        .btn-out:hover { border-color: #cbd5e1; background: #f8fafc; color: var(--text); }
+        .ico-btn {
+            width: 32px; height: 32px; display: inline-flex; align-items: center;
+            justify-content: center; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--card);
+            color: var(--text-3); font-size: .8rem; cursor: pointer;
+            text-decoration: none; transition: all .18s;
+        }
+        .ico-btn:hover         { background: #f8fafc; color: var(--text-2); }
+        .ico-btn.v:hover { background: var(--info-l);    color: var(--info);    border-color: #bfdbfe; }
+        .ico-btn.e:hover { background: var(--warning-l); color: var(--warning); border-color: #fde68a; }
+        .ico-btn.d:hover { background: var(--danger-l);  color: var(--danger);  border-color: #fecaca; }
+
+        /* ══ FORMS ═══════════════════════════════════════════════ */
+        .fgroup { margin-bottom: .95rem; }
+        .fgroup label { font-size: .75rem; font-weight: 600; color: var(--text-2); display: block; margin-bottom: .35rem; }
+        .form-control, .form-select {
+            width: 100%; border: 1.5px solid var(--border); border-radius: 9px;
+            padding: .55rem .9rem; font-size: .82rem; font-family: 'Poppins', sans-serif;
+            color: var(--text); background: #fff; transition: border-color .18s, box-shadow .18s;
+        }
+        .form-control:focus, .form-select:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(249,115,22,.12);
+        }
+        .form-control:disabled { background: #f8fafc; color: var(--text-3); }
+        .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
+
+        /* ══ FLASH ═══════════════════════════════════════════════ */
+        .flash {
+            border-radius: 10px; padding: .8rem 1rem; margin-bottom: 1rem;
+            font-size: .8rem; display: flex; align-items: center; gap: .6rem;
+            border: 1px solid transparent;
+        }
+        .flash-success { background: var(--success-l); border-color: #bbf7d0; color: #166534; }
+        .flash-danger  { background: var(--danger-l);  border-color: #fecaca; color: #991b1b; }
+        .flash-warning { background: var(--warning-l); border-color: #fde68a; color: #92400e; }
+        .flash-info    { background: var(--info-l);    border-color: #bfdbfe; color: #1e40af; }
+
+        /* ══ AVATAR ══════════════════════════════════════════════ */
+        .u-avatar {
+            width: 68px; height: 68px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-d));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.45rem; font-weight: 800; color: #fff;
+            box-shadow: 0 4px 14px rgba(249,115,22,.35);
+        }
+
+        /* ══ METRIC CHIP ═════════════════════════════════════════ */
+        .metric-chip { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: .8rem 1rem; }
+        .mc-label { font-size: .62rem; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .07em; }
+        .mc-value { font-size: 1.1rem; font-weight: 800; color: var(--text); display: flex; align-items: baseline; gap: .25rem; }
+        .mc-unit  { font-size: .7rem; font-weight: 500; color: var(--text-3); }
+
+        /* ══ PROGRESS BAR ════════════════════════════════════════ */
+        .prog { height: 6px; background: #f1f5f9; border-radius: 999px; overflow: hidden; }
+        .prog-bar { height: 100%; border-radius: 999px; transition: width .4s; }
+
+        /* ══ DETAIL ROW ══════════════════════════════════════════ */
+        .drow { display: flex; align-items: center; gap: .75rem; padding: .6rem 0; border-bottom: 1px solid #f1f5f9; font-size: .8rem; }
+        .drow:last-child { border-bottom: none; }
+        .drow i { color: var(--accent); width: 16px; flex-shrink: 0; }
+
+        /* ══ EMPTY STATE ══════════════════════════════════════════ */
+        .empty { text-align: center; padding: 3rem 2rem; color: var(--text-3); }
+        .empty-icon {
+            width: 56px; height: 56px; background: #f1f5f9; border-radius: 14px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; margin-bottom: 1rem;
+        }
+        .empty h6 { font-size: .88rem; font-weight: 600; color: var(--text-2); margin-bottom: .3rem; }
+        .empty p  { font-size: .77rem; color: var(--text-3); max-width: 280px; margin: 0 auto; }
+
+        /* ══ FILTER BAR ══════════════════════════════════════════ */
+        .filter-bar {
+            background: var(--card); border-radius: var(--radius);
+            border: 1px solid var(--border); padding: 1rem 1.25rem;
+            margin-bottom: 1rem; box-shadow: var(--shadow);
+        }
+
+        /* ══ MODAL ═══════════════════════════════════════════════ */
+        .modal-content { border-radius: 14px; border: 1px solid var(--border); }
+        .modal-header  { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
+        .modal-body    { padding: 1rem 1.25rem; font-size: .82rem; color: var(--text-2); }
+        .modal-footer  { padding: .75rem 1.25rem; border-top: 1px solid var(--border); gap: .5rem; }
+        .modal-title   { font-size: .9rem; font-weight: 700; display: flex; align-items: center; gap: .5rem; }
+
+        /* ══ DASHBOARD BANNER ════════════════════════════════════ */
+        .dash-banner {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #1c2d40 100%);
+            border-radius: var(--radius); padding: 1.5rem 1.75rem;
+            margin-bottom: 1.5rem; position: relative; overflow: hidden;
+            border: 1px solid rgba(249,115,22,.12);
+        }
+        .dash-banner::before {
+            content: ''; position: absolute; right: -30px; top: -50px;
+            width: 220px; height: 220px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(249,115,22,.13) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .dash-banner::after {
+            content: ''; position: absolute; right: 110px; bottom: -35px;
+            width: 140px; height: 140px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(59,130,246,.07) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .dash-banner h2 { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: .3rem; }
+        .dash-banner p  { font-size: .78rem; color: #94a3b8; margin: 0; }
+        .db-badge {
+            display: inline-flex; align-items: center; gap: .4rem;
+            margin-top: .65rem; font-size: .7rem; font-weight: 600;
+            background: rgba(34,197,94,.12); color: #4ade80;
+            border: 1px solid rgba(34,197,94,.22); border-radius: 6px; padding: .22rem .7rem;
+        }
+        .db-badge .dot {
+            width: 6px; height: 6px; background: #4ade80; border-radius: 50%;
+            display: inline-block; box-shadow: 0 0 6px rgba(74,222,128,.7);
+        }
+
+        /* ══ ENGAGE CARD ══════════════════════════════════════════ */
+        .sc.engage-card {
+            background: linear-gradient(135deg, var(--accent), var(--accent-d));
+            border: none; box-shadow: 0 4px 14px rgba(249,115,22,.35);
+        }
+        .engage-card .sc-icon { background: rgba(255,255,255,.18); color: #fff; }
+        .engage-card .sc-label { color: rgba(255,255,255,.7); }
+        .engage-card .sc-value { color: #fff; }
+        .engage-card .sc-sub   { color: rgba(255,255,255,.65); }
+
+        /* ══ RESPONSIVE ══════════════════════════════════════════ */
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0; z-index: 849;
+            background: rgba(0,0,0,.45); backdrop-filter: blur(2px);
+        }
+        .sidebar-overlay.show { display: block; }
+        .tb-hamburger {
+            display: none; background: none; border: none; color: #fff;
+            font-size: 1.2rem; cursor: pointer; padding: .3rem .45rem;
+            border-radius: 7px; transition: background .18s; line-height:1;
+        }
+        .tb-hamburger:hover { background: rgba(255,255,255,.1); }
+        @media (max-width: 991px) {
+            .sidebar { transform: translateX(-100%); transition: transform .25s ease; }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; }
+            .tb-hamburger { display: flex; align-items: center; }
+            .pg-head { flex-direction: column; gap: .75rem; }
+            .pg-head > a, .pg-head > .btn-ac { align-self: flex-start; }
+        }
+        @media (max-width: 767px) {
+            .dash-banner { padding: 1.1rem 1.25rem; }
+            .sc-value { font-size: 1.5rem; }
+            .main { padding: 1.25rem 1rem; }
+            .acard-head { flex-wrap: wrap; gap: .5rem; }
+            .tb-user span { display: none; }
+            .tb-admin-badge { display: none; }
+        }
+        @media (max-width: 575px) {
+            .main { padding: 1rem .75rem; }
+        }
+    </style>
 </head>
 <body>
-    
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">
-                <i class="bi bi-heart-pulse me-2"></i>
-                Smart Diet & Lifestyle Planner
-            </a>
-            <div class="ms-auto d-flex align-items-center">
-                <span class="text-white me-3">
-                    <i class="bi bi-shield-check me-2"></i>Admin: {{ session['username'] }}
-                </span>
-                <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">
-                    <i class="bi bi-box-arrow-right me-2"></i>Logout
-                </a>
+
+<!-- ═══════════════════ TOP BAR ═══════════════════════ -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="topbar">
+    <button class="tb-hamburger" id="hamburgerBtn" aria-label="Toggle sidebar">
+        <i class="bi bi-list"></i>
+    </button>
+    <a href="{{ url_for('admin_dashboard') }}" class="tb-brand">
+        <div class="tb-brand-icon"><i class="bi bi-heart-pulse-fill" style="color:#fff;"></i></div>
+        Smart Diet Planner
+    </a>
+    <span class="tb-admin-badge"><i class="bi bi-shield-fill me-1"></i>Admin</span>
+    <div class="tb-right">
+        <div class="tb-user">
+            <div class="tb-avatar">{{ session.get('username','A')[0]|upper }}</div>
+            <span>{{ session.get('username','Admin') }}</span>
+        </div>
+        <a href="{{ url_for('logout') }}" class="tb-logout">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </div>
+</header>
+
+<!-- ═══════════════════ SIDEBAR ═══════════════════════ -->
+<aside class="sidebar">
+    <div style="padding:.6rem 0 1rem;">
+
+        <a class="sb-link {% if not view %}active{% endif %}" href="{{ url_for('admin_dashboard') }}">
+            <i class="bi bi-grid-1x2-fill"></i> Overview
+        </a>
+        <a class="sb-link {% if view in ['users','view_user','create_user','update_user'] %}active{% endif %}"
+           href="{{ url_for('admin_users') }}">
+            <i class="bi bi-people-fill"></i> Manage Users
+        </a>
+
+        <hr class="sb-hr">
+        <div class="sb-section">User Logs</div>
+
+        <a class="sb-link {% if view=='daily_logs' %}active{% endif %}" href="{{ url_for('admin_daily_logs') }}">
+            <i class="bi bi-calendar2-week-fill"></i> Daily Logs
+        </a>
+        <a class="sb-link {% if view=='meal_logs' %}active{% endif %}" href="{{ url_for('admin_meal_logs') }}">
+            <i class="bi bi-egg-fried"></i> Meal Logs
+        </a>
+        <a class="sb-link {% if view=='activity_logs' %}active{% endif %}" href="{{ url_for('admin_activity_logs') }}">
+            <i class="bi bi-lightning-charge-fill"></i> Activity Logs
+        </a>
+        <a class="sb-link {% if view=='mood_logs' %}active{% endif %}" href="{{ url_for('admin_mood_logs') }}">
+            <i class="bi bi-emoji-smile-fill"></i> Mood Logs
+        </a>
+        <a class="sb-link {% if view=='goals' %}active{% endif %}" href="{{ url_for('admin_goals') }}">
+            <i class="bi bi-bullseye"></i> Goals
+        </a>
+
+        <hr class="sb-hr">
+        <div class="sb-section">Master Data</div>
+
+        <a class="sb-link {% if view in ['meals','edit_meal'] %}active{% endif %}" href="{{ url_for('admin_meals') }}">
+            <i class="bi bi-basket3-fill"></i> Meals DB
+        </a>
+        <a class="sb-link {% if view in ['activities','edit_activity'] %}active{% endif %}" href="{{ url_for('admin_activities') }}">
+            <i class="bi bi-bicycle"></i> Activities DB
+        </a>
+        <a class="sb-link {% if view=='add_meal' %}active{% endif %}" href="{{ url_for('admin_add_meal') }}">
+            <i class="bi bi-plus-square-fill"></i> Add Meal
+        </a>
+        <a class="sb-link {% if view=='add_activity' %}active{% endif %}" href="{{ url_for('admin_add_activity') }}">
+            <i class="bi bi-plus-square-fill"></i> Add Activity
+        </a>
+
+        <hr class="sb-hr">
+        <div class="sb-section">AI &amp; Reports</div>
+
+        <a class="sb-link {% if view=='suggestions' %}active{% endif %}" href="{{ url_for('admin_suggestions') }}">
+            <i class="bi bi-stars"></i> AI Suggestions
+        </a>
+        <a class="sb-link {% if view=='reports' %}active{% endif %}" href="{{ url_for('admin_reports') }}">
+            <i class="bi bi-file-bar-graph-fill"></i> Reports
+        </a>
+
+    </div>
+</aside>
+
+<!-- ═══════════════════ MAIN ══════════════════════════ -->
+<main class="main">
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="toast-wrapper" id="sdpToasts">
+        {% for category, message in messages %}
+        {% set c = 'error' if category in ('error','danger') else category %}
+        {% set icon = 'check-circle-fill' if c == 'success' else ('x-circle-fill' if c == 'error' else ('exclamation-triangle-fill' if c == 'warning' else 'info-circle-fill')) %}
+        {% set label = 'Success' if c == 'success' else ('Error' if c == 'error' else ('Warning' if c == 'warning' else 'Notice')) %}
+        <div class="toast-msg toast-{{ c }}">
+            <div class="toast-icon"><i class="bi bi-{{ icon }}"></i></div>
+            <div style="flex:1;min-width:0;">
+                <span class="toast-cat">{{ label }}</span>
+                <span class="toast-text">{{ message }}</span>
+            </div>
+            <button class="toast-close" onclick="sdpDismiss(this.closest('.toast-msg'))"><i class="bi bi-x-lg"></i></button>
+        </div>
+        {% endfor %}
+    </div>
+    <script>
+    function sdpDismiss(el){el.classList.add('sdp-dismissing');setTimeout(function(){el.remove();},360);}
+    document.querySelectorAll('.toast-msg').forEach(function(t,i){setTimeout(function(){sdpDismiss(t);},4500+i*600);});
+    </script>
+    {% endif %}
+    {% endwith %}
+
+    <!-- ════════════════ DASHBOARD OVERVIEW ════════════════ -->
+    {% if not view %}
+
+    <div class="dash-banner">
+        <div class="row align-items-center">
+            <div class="col">
+                <h2><i class="bi bi-grid-1x2-fill me-2" style="color:var(--accent);"></i>Dashboard Overview</h2>
+                <p>Smart Diet Planner · Full platform visibility and control</p>
+                <span class="db-badge"><span class="dot"></span> System Operational</span>
+            </div>
+            <div class="col-auto d-none d-md-block">
+                <div style="font-size:3.5rem;opacity:.06;color:#fff;">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                </div>
             </div>
         </div>
-    </nav>
-    
-    <div class="container-fluid">
-        <div class="row">
-            
-            <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar">
-                <div class="position-sticky pt-3">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link {% if not view %}active{% endif %}" href="{{ url_for('admin_dashboard') }}">
-                                <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if view == 'users' %}active{% endif %}" href="{{ url_for('admin_users') }}">
-                                <i class="bi bi-people me-2"></i>Manage Users
-                            </a>
-                        </li>
-                        <hr>
-                        <li class="nav-item small text-muted ps-3">LOGS</li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if view == 'daily_logs' %}active{% endif %}" href="{{ url_for('admin_daily_logs') }}">
-                                <i class="bi bi-calendar-day me-2"></i>Daily Logs
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if view == 'meal_logs' %}active{% endif %}" href="{{ url_for('admin_meal_logs') }}">
-                                <i class="bi bi-cup-straw me-2"></i>Meal Logs
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if view == 'activity_logs' %}active{% endif %}" href="{{ url_for('admin_activity_logs') }}">
-                                <i class="bi bi-activity me-2"></i>Activity Logs
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if view == 'mood_logs' %}active{% endif %}" href="{{ url_for('admin_mood_logs') }}">
-                                <i class="bi bi-emoji-smile me-2"></i>Mood Logs
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if view == 'goals' %}active{% endif %}" href="{{ url_for('admin_goals') }}">
-                                <i class="bi bi-bullseye me-2"></i>Goals
-                            </a>
-                        </li>
-                        <hr>
-                        <li class="nav-item small text-muted ps-3">MASTER DATA</li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if view == 'meals' %}active{% endif %}" href="{{ url_for('admin_meals') }}">
-                                <i class="bi bi-egg-fried me-2"></i>View Meals
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if view == 'activities' %}active{% endif %}" href="{{ url_for('admin_activities') }}">
-                                <i class="bi bi-bicycle me-2"></i>View Activities
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if view == 'add_meal' %}active{% endif %}" href="{{ url_for('admin_add_meal') }}">
-                                <i class="bi bi-plus-circle me-2"></i>Add Meals
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if view == 'add_activity' %}active{% endif %}" href="{{ url_for('admin_add_activity') }}">
-                                <i class="bi bi-plus-circle me-2"></i>Add Activities
-                            </a>
-                        </li>
-                        <hr>
-                        <li class="nav-item small text-muted ps-3">AI & REPORTS</li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if view == 'suggestions' %}active{% endif %}" href="{{ url_for('admin_suggestions') }}">
-                                <i class="bi bi-lightbulb me-2"></i>Suggestions
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if view == 'reports' %}active{% endif %}" href="{{ url_for('admin_reports') }}">
-                                <i class="bi bi-file-earmark-bar-graph me-2"></i>Reports
-                            </a>
-                        </li>
-                    </ul>
+    </div>
+
+    <!-- Tier 1: Core activity -->
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-md-3">
+            <div class="sc">
+                <div class="sc-icon ic-orange"><i class="bi bi-people-fill"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">Total Users</div>
+                    <div class="sc-value">{{ total_users or 0 }}</div>
+                    <div class="sc-sub">Registered accounts</div>
                 </div>
-            </nav>
-            
-            <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                
-                <!-- Dashboard Overview -->
-                {% if not view %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-speedometer2 me-2"></i>Admin Dashboard
-                    </h1>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="sc">
+                <div class="sc-icon ic-blue"><i class="bi bi-calendar2-check-fill"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">Daily Logs</div>
+                    <div class="sc-value">{{ total_logs or 0 }}</div>
+                    <div class="sc-sub">Health entries tracked</div>
                 </div>
-                
-                <div class="row g-3 mb-4">
-                    <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #E8B4BC, #D89FA8);">
-                                <i class="bi bi-people-fill"></i>
-                            </div>
-                            <h3>{{ total_users if total_users else 0 }}</h3>
-                            <p class="text-muted mb-0">Total Users</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #C8D8C0, #A8C8A0);">
-                                <i class="bi bi-calendar-check-fill"></i>
-                            </div>
-                            <h3>{{ total_logs if total_logs else 0 }}</h3>
-                            <p class="text-muted mb-0">Daily Logs</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #F4D4A8, #E8C490);">
-                                <i class="bi bi-egg-fried"></i>
-                            </div>
-                            <h3>{{ total_meal_logs if total_meal_logs else 0 }}</h3>
-                            <p class="text-muted mb-0">Meal Logs</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #B4D4E8, #A0C4D8);">
-                                <i class="bi bi-activity"></i>
-                            </div>
-                            <h3>{{ total_activity_logs if total_activity_logs else 0 }}</h3>
-                            <p class="text-muted mb-0">Activity Logs</p>
-                        </div>
-                    </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="sc">
+                <div class="sc-icon ic-green"><i class="bi bi-egg-fried"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">Meal Logs</div>
+                    <div class="sc-value">{{ total_meal_logs or 0 }}</div>
+                    <div class="sc-sub">Meals recorded</div>
                 </div>
-                
-                <!-- Second Row Stats -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #DDA0DD, #BA55D3);">
-                                <i class="bi bi-emoji-smile-fill"></i>
-                            </div>
-                            <h3>{{ total_mood_logs if total_mood_logs else 0 }}</h3>
-                            <p class="text-muted mb-0">Mood Logs</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #98D8C8, #66B2A0);">
-                                <i class="bi bi-bullseye"></i>
-                            </div>
-                            <h3>{{ total_goals if total_goals else 0 }}</h3>
-                            <p class="text-muted mb-0">Goals Set</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #FFB347, #FF8C00);">
-                                <i class="bi bi-lightbulb-fill"></i>
-                            </div>
-                            <h3>{{ total_suggestions if total_suggestions else 0 }}</h3>
-                            <p class="text-muted mb-0">AI Suggestions</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #87CEEB, #4169E1);">
-                                <i class="bi bi-file-earmark-bar-graph-fill"></i>
-                            </div>
-                            <h3>{{ total_reports if total_reports else 0 }}</h3>
-                            <p class="text-muted mb-0">Reports Generated</p>
-                        </div>
-                    </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="sc">
+                <div class="sc-icon ic-amber"><i class="bi bi-lightning-charge-fill"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">Activity Logs</div>
+                    <div class="sc-value">{{ total_activity_logs or 0 }}</div>
+                    <div class="sc-sub">Workouts tracked</div>
                 </div>
-                
-                <!-- Third Row - Master Data Stats -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #FADADD, #E8B4BC);">
-                                <i class="bi bi-basket-fill"></i>
-                            </div>
-                            <h3>{{ total_meals if total_meals else 0 }}</h3>
-                            <p class="text-muted mb-0">Meals in Database</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #C8D8C0, #98C890);">
-                                <i class="bi bi-bicycle"></i>
-                            </div>
-                            <h3>{{ total_activities if total_activities else 0 }}</h3>
-                            <p class="text-muted mb-0">Activities in Database</p>
-                        </div>
-                    </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tier 2: Engagement + AI -->
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-md-3">
+            <div class="sc">
+                <div class="sc-icon ic-purple"><i class="bi bi-emoji-smile-fill"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">Mood Logs</div>
+                    <div class="sc-value">{{ total_mood_logs or 0 }}</div>
+                    <div class="sc-sub">Wellbeing entries</div>
                 </div>
-                
-                <!-- Recent Users Table -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="bi bi-people me-2"></i>Recent Users</h5>
-                            </div>
-                            <div class="card-body">
-                                {% if recent_users %}
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Username</th>
-                                                <th>Name</th>
-                                                <th>Email</th>
-                                                <th>Joined</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for user in recent_users %}
-                                            <tr>
-                                                <td>{{ user[0] }}</td>
-                                                <td>{{ user[1] }}</td>
-                                                <td>{{ user[2] }} {{ user[3] }}</td>
-                                                <td>{{ user[4] }}</td>
-                                                <td>{{ user[5] }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="sc">
+                <div class="sc-icon ic-teal"><i class="bi bi-bullseye"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">Goals Set</div>
+                    <div class="sc-value">{{ total_goals or 0 }}</div>
+                    <div class="sc-sub">Active user targets</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="sc">
+                <div class="sc-icon ic-blue"><i class="bi bi-stars"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">AI Suggestions</div>
+                    <div class="sc-value">{{ total_suggestions or 0 }}</div>
+                    <div class="sc-sub">Recommendations sent</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="sc">
+                <div class="sc-icon ic-red"><i class="bi bi-file-bar-graph-fill"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">Reports</div>
+                    <div class="sc-value">{{ total_reports or 0 }}</div>
+                    <div class="sc-sub">Generated reports</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tier 3: DB inventory + computed metric -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4">
+            <div class="sc">
+                <div class="sc-icon ic-green"><i class="bi bi-basket3-fill"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">Meals Database</div>
+                    <div class="sc-value">{{ total_meals or 0 }}</div>
+                    <div class="sc-sub">Food items available</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="sc">
+                <div class="sc-icon ic-amber"><i class="bi bi-bicycle"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">Activities Database</div>
+                    <div class="sc-value">{{ total_activities or 0 }}</div>
+                    <div class="sc-sub">Exercise types</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="sc engage-card">
+                <div class="sc-icon"><i class="bi bi-activity"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">Engagement Rate</div>
+                    <div class="sc-value">
+                        {% if total_users and total_users > 0 and total_logs %}
+                            {{ "%.1f"|format(total_logs / total_users) }}×
+                        {% else %}—{% endif %}
+                    </div>
+                    <div class="sc-sub">Avg daily logs per user</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Registrations -->
+    <div class="acard">
+        <div class="acard-head">
+            <h6>
+                <span class="ch-icon ic-orange"><i class="bi bi-person-plus-fill"></i></span>
+                Recent Registrations
+            </h6>
+            <a href="{{ url_for('admin_users') }}" class="btn-out" style="font-size:.75rem;padding:.3rem .8rem;">
+                View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div style="overflow-x:auto;">
+            <table class="atable">
+                <thead>
+                    <tr><th>ID</th><th>User</th><th>Full Name</th><th>Email</th><th>Joined</th><th style="text-align:right;">Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% if recent_users %}
+                    {% for u in recent_users %}
+                    <tr>
+                        <td class="col-id">#{{ u[0] }}</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:.55rem;">
+                                <div style="width:29px;height:29px;border-radius:8px;background:var(--accent-l);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">
+                                    {{ u[1][0]|upper if u[1] else '?' }}
                                 </div>
-                                {% else %}
-                                <p class="text-muted">No users found</p>
-                                {% endif %}
+                                <strong>{{ u[1] }}</strong>
+                            </div>
+                        </td>
+                        <td>{{ u[2] }} {{ u[3] }}</td>
+                        <td style="color:var(--text-3);">{{ u[4] }}</td>
+                        <td style="color:var(--text-3);">{{ u[5] or 'N/A' }}</td>
+                        <td style="text-align:right;">
+                            <a href="{{ url_for('admin_view_user', user_id=u[0]) }}" class="ico-btn v" title="View Profile">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr><td colspan="6">
+                        <div class="empty">
+                            <div class="empty-icon"><i class="bi bi-people"></i></div>
+                            <h6>No users registered yet</h6>
+                            <p>New registrations will appear here automatically.</p>
+                        </div>
+                    </td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ MANAGE USERS ══════════════════════ -->
+    {% if view == 'users' %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-people-fill"></i></span> Manage Users</h1>
+            <p>View, edit, and manage all registered accounts on the platform</p>
+        </div>
+        <a href="{{ url_for('admin_create_user') }}" class="btn-ac">
+            <i class="bi bi-person-plus-fill"></i> Add User
+        </a>
+    </div>
+
+    <div class="filter-bar">
+        <form method="GET" action="{{ url_for('admin_users') }}">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <div class="fgroup" style="margin-bottom:0;">
+                        <label>Search Users</label>
+                        <input type="text" class="form-control" name="search_name"
+                               value="{{ search_name or '' }}" placeholder="Username, first or last name…">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="fgroup" style="margin-bottom:0;">
+                        <label>Filter by Gender</label>
+                        <select class="form-select" name="filter_gender">
+                            <option value="">All Genders</option>
+                            <option value="Male"   {% if filter_gender=='Male'   %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if filter_gender=='Female' %}selected{% endif %}>Female</option>
+                            <option value="Other"  {% if filter_gender=='Other'  %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn-ac w-100" style="justify-content:center;">
+                        <i class="bi bi-funnel-fill"></i> Apply Filter
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="acard">
+        <div style="overflow-x:auto;">
+            <table class="atable">
+                <thead>
+                    <tr>
+                        <th>ID</th><th>User</th><th>Full Name</th><th>Email</th>
+                        <th>Gender</th><th>Activity Level</th><th>Joined</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if users %}
+                    {% for user in users %}
+                    <tr>
+                        <td class="col-id">#{{ user[0] }}</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:.55rem;">
+                                <div style="width:30px;height:30px;border-radius:8px;background:var(--accent-l);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">
+                                    {{ user[1][0]|upper if user[1] else '?' }}
+                                </div>
+                                <strong>{{ user[1] }}</strong>
+                            </div>
+                        </td>
+                        <td>{{ user[3] }} {{ user[4] }}</td>
+                        <td style="color:var(--text-3);">{{ user[2] }}</td>
+                        <td>
+                            <span class="pill {% if user[5]=='Male' %}p-blue{% elif user[5]=='Female' %}p-purple{% else %}p-gray{% endif %}">
+                                {{ user[5] or 'N/A' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="pill {% if user[8] in ('Active','Very Active') %}p-green{% elif user[8]=='Moderate' %}p-amber{% else %}p-gray{% endif %}">
+                                {{ user[8] or 'N/A' }}
+                            </span>
+                        </td>
+                        <td style="color:var(--text-3);">{{ user[9] or 'N/A' }}</td>
+                        <td style="text-align:right;">
+                            <div style="display:flex;justify-content:flex-end;gap:.3rem;">
+                                <a href="{{ url_for('admin_view_user', user_id=user[0]) }}" class="ico-btn v" title="View"><i class="bi bi-eye"></i></a>
+                                <a href="{{ url_for('admin_update_user', user_id=user[0]) }}" class="ico-btn e" title="Edit"><i class="bi bi-pencil"></i></a>
+                                <button class="ico-btn d" data-bs-toggle="modal" data-bs-target="#del{{ user[0] }}" title="Delete"><i class="bi bi-trash"></i></button>
+                            </div>
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="del{{ user[0] }}" tabindex="-1">
+                                <div class="modal-dialog modal-sm">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <span class="modal-title">
+                                                <span style="width:26px;height:26px;border-radius:7px;background:var(--danger-l);color:var(--danger);display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;"><i class="bi bi-trash"></i></span>
+                                                Delete User
+                                            </span>
+                                            <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Delete <strong>{{ user[1] }}</strong>? This will permanently remove the account and all associated data. This action cannot be undone.
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn-out" data-bs-dismiss="modal">Cancel</button>
+                                            <form method="POST" action="{{ url_for('admin_delete_user', user_id=user[0]) }}" style="display:inline;">
+                                                <button type="submit" class="btn-ac btn-danger"><i class="bi bi-trash"></i> Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr><td colspan="8">
+                        <div class="empty">
+                            <div class="empty-icon"><i class="bi bi-people"></i></div>
+                            <h6>No users found</h6>
+                            <p>Try adjusting your search or filter criteria.</p>
+                        </div>
+                    </td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ VIEW USER ═════════════════════════ -->
+    {% if view == 'view_user' and user %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-person-circle"></i></span> User Profile</h1>
+            <p>Viewing account @{{ user[1] }}</p>
+        </div>
+        <div style="display:flex;gap:.5rem;">
+            <a href="{{ url_for('admin_update_user', user_id=user[0]) }}" class="btn-ac"><i class="bi bi-pencil"></i> Edit</a>
+            <a href="{{ url_for('admin_users') }}" class="btn-out"><i class="bi bi-arrow-left"></i> Back</a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="acard">
+                <div class="acard-head"><h6><span class="ch-icon ic-orange"><i class="bi bi-person-fill"></i></span> Personal Info</h6></div>
+                <div style="padding:1.5rem;text-align:center;">
+                    <div class="u-avatar mx-auto mb-3">
+                        {{ user[3][0]|upper if user[3] else 'U' }}{{ user[4][0]|upper if user[4] else '' }}
+                    </div>
+                    <div style="font-size:1rem;font-weight:700;color:var(--text);">{{ user[3] }} {{ user[4] }}</div>
+                    <div style="font-size:.78rem;color:var(--text-3);">@{{ user[1] }}</div>
+                    <div class="mt-2">
+                        {% if user[10] == 1 %}
+                        <span class="pill p-orange"><i class="bi bi-shield-fill" style="font-size:.6rem;"></i> Admin</span>
+                        {% else %}
+                        <span class="pill p-green"><i class="bi bi-person-fill" style="font-size:.6rem;"></i> User</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div style="padding:0 1.25rem 1.25rem;">
+                    {% for icon, label, val in [
+                        ('envelope-fill','Email',  user[2]),
+                        ('calendar-fill','DOB',    user[5] or 'N/A'),
+                        ('gender-ambiguous','Gender', user[6] or 'N/A'),
+                        ('clock-fill','Joined',   user[11] or 'N/A')
+                    ] %}
+                    <div class="drow">
+                        <i class="bi bi-{{ icon }}"></i>
+                        <span style="font-size:.79rem;"><strong style="color:var(--text-2);">{{ label }}:</strong>&nbsp;{{ val }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="acard mb-3">
+                <div class="acard-head"><h6><span class="ch-icon ic-red"><i class="bi bi-heart-pulse-fill"></i></span> Health Metrics</h6></div>
+                <div class="acard-body">
+                    <div class="row g-2">
+                        {% for lbl, val, unit in [('Weight', user[7], 'kg'), ('Height', user[8], 'cm')] %}
+                        <div class="col-6 col-sm-3">
+                            <div class="metric-chip">
+                                <div class="mc-label">{{ lbl }}</div>
+                                <div class="mc-value">{{ val or '—' }}<span class="mc-unit">{{ unit }}</span></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="col-6 col-sm-3">
+                            <div class="metric-chip">
+                                <div class="mc-label">BMI</div>
+                                <div class="mc-value">
+                                    {% if user[7] and user[8] %}
+                                    {% set bmi = user[7]|float / ((user[8]|float / 100) ** 2) %}
+                                    {{ "%.1f"|format(bmi) }}
+                                    <span class="mc-unit" style="font-size:.6rem;">
+                                        {% if bmi < 18.5 %}Under{% elif bmi < 25 %}Normal{% elif bmi < 30 %}Over{% else %}Obese{% endif %}
+                                    </span>
+                                    {% else %}—{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="metric-chip">
+                                <div class="mc-label">Activity</div>
+                                <div class="mc-value" style="font-size:.82rem;">{{ user[9] or '—' }}</div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="acard mb-3">
+                <div class="acard-head"><h6><span class="ch-icon ic-teal"><i class="bi bi-bullseye"></i></span> Goals</h6></div>
+                {% if goals %}
+                {% for goal in goals %}
+                <div style="padding:.875rem 1.25rem;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:.875rem;">
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:.82rem;font-weight:600;color:var(--text);">{{ goal[1] }}</div>
+                        <div style="font-size:.7rem;color:var(--text-3);margin-top:.1rem;">{{ goal[3] or 0 }} / {{ goal[2] or 0 }}</div>
+                        {% if goal[2] and goal[3] and goal[2]|float > 0 %}
+                        {% set pct = ((goal[3]|float / goal[2]|float) * 100)|int %}
+                        <div class="prog mt-1"><div class="prog-bar" style="width:{{ [pct,100]|min }}%;background:{% if pct >= 80 %}var(--success){% elif pct >= 40 %}var(--warning){% else %}var(--danger){% endif %};"></div></div>
+                        {% endif %}
+                    </div>
+                    <span class="pill {% if goal[6]=='Active' %}p-green{% elif goal[6]=='Completed' %}p-blue{% else %}p-gray{% endif %}">{{ goal[6] or 'N/A' }}</span>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="empty" style="padding:1.5rem;">
+                    <div class="empty-icon" style="width:40px;height:40px;font-size:1.1rem;"><i class="bi bi-bullseye"></i></div>
+                    <h6 style="font-size:.82rem;">No goals set</h6>
                 </div>
                 {% endif %}
-                
-                <!-- Manage Users View -->
-                {% if view == 'users' %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-people me-2"></i>Manage Users
-                    </h1>
-                    <a href="{{ url_for('admin_create_user') }}" class="btn btn-primary">
-                        <i class="bi bi-person-plus me-2"></i>Add New User
-                    </a>
+            </div>
+
+            <div class="acard">
+                <div class="acard-head"><h6><span class="ch-icon ic-blue"><i class="bi bi-calendar-check-fill"></i></span> Recent Daily Logs</h6></div>
+                <div style="overflow-x:auto;">
+                    <table class="atable">
+                        <thead><tr><th>Date</th><th>Cal In</th><th>Cal Burned</th><th>Water</th><th>Weight</th></tr></thead>
+                        <tbody>
+                            {% if logs %}
+                            {% for log in logs %}
+                            <tr>
+                                <td>{{ log[0] }}</td>
+                                <td><span class="pill p-orange">{{ log[1] or 0 }} kcal</span></td>
+                                <td><span class="pill p-amber">{{ log[2] or 0 }} kcal</span></td>
+                                <td>{{ log[3] or 0 }} L</td>
+                                <td>{{ log[4] or '—' }} kg</td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr><td colspan="5">
+                                <div class="empty" style="padding:1.5rem;">
+                                    <div class="empty-icon" style="width:38px;height:38px;font-size:1rem;"><i class="bi bi-calendar"></i></div>
+                                    <h6 style="font-size:.8rem;">No logs found</h6>
+                                </div>
+                            </td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
                 </div>
-                
-                <!-- Search and Filter Bar -->
-                <div class="search-filter-bar">
-                    <form method="GET" action="{{ url_for('admin_users') }}" class="row g-3">
-                        <div class="col-md-6">
-                            <div class="search-input">
-                                <i class="bi bi-search"></i>
-                                <input type="text" class="form-control" name="search_name" 
-                                       value="{{ search_name if search_name else '' }}" 
-                                       placeholder="Search by name or username...">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ CREATE USER ═══════════════════════ -->
+    {% if view == 'create_user' %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-person-plus-fill"></i></span> Create New User</h1>
+            <p>Add a new account to the platform</p>
+        </div>
+        <a href="{{ url_for('admin_users') }}" class="btn-out"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-9">
+            <div class="acard">
+                <div class="acard-head"><h6><span class="ch-icon ic-orange"><i class="bi bi-person-fill-add"></i></span> Account Details</h6></div>
+                <div class="acard-body" style="padding:1.5rem;">
+                    <form method="POST" action="{{ url_for('admin_create_user') }}">
+                        <div class="row g-3">
+                            <div class="col-md-6"><div class="fgroup"><label>Username <span style="color:var(--danger);">*</span></label><input type="text" class="form-control" name="username" required placeholder="e.g. john_doe"></div></div>
+                            <div class="col-md-6"><div class="fgroup"><label>Email <span style="color:var(--danger);">*</span></label><input type="email" class="form-control" name="email" required placeholder="user@example.com"></div></div>
+                            <div class="col-md-6"><div class="fgroup"><label>First Name <span style="color:var(--danger);">*</span></label><input type="text" class="form-control" name="first_name" required></div></div>
+                            <div class="col-md-6"><div class="fgroup"><label>Last Name <span style="color:var(--danger);">*</span></label><input type="text" class="form-control" name="last_name" required></div></div>
+                            <div class="col-md-6"><div class="fgroup"><label>Password <span style="color:var(--danger);">*</span></label><input type="password" class="form-control" name="password" required></div></div>
+                            <div class="col-md-6"><div class="fgroup"><label>Date of Birth</label><input type="date" class="form-control" name="date_of_birth"></div></div>
+                            <div class="col-md-4"><div class="fgroup"><label>Gender</label><select class="form-select" name="gender"><option>Male</option><option>Female</option><option>Other</option></select></div></div>
+                            <div class="col-md-4"><div class="fgroup"><label>Weight (kg)</label><input type="number" step="0.1" class="form-control" name="weight" placeholder="70.0"></div></div>
+                            <div class="col-md-4"><div class="fgroup"><label>Height (cm)</label><input type="number" step="0.1" class="form-control" name="height" placeholder="170.0"></div></div>
+                            <div class="col-md-6"><div class="fgroup"><label>Activity Level</label>
+                                <select class="form-select" name="activity_level">
+                                    <option>Sedentary</option><option>Light</option>
+                                    <option selected>Moderate</option><option>Active</option><option>Very Active</option>
+                                </select>
+                            </div></div>
+                            <div class="col-md-6 d-flex align-items-end pb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_admin" id="isAdm">
+                                    <label class="form-check-label" for="isAdm" style="font-size:.8rem;font-weight:600;color:var(--text-2);">
+                                        <i class="bi bi-shield-fill me-1" style="color:var(--accent);"></i>Grant Admin Privileges
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <select class="form-select" name="filter_gender">
-                                <option value="">All Genders</option>
-                                <option value="Male" {% if filter_gender == 'Male' %}selected{% endif %}>Male</option>
-                                <option value="Female" {% if filter_gender == 'Female' %}selected{% endif %}>Female</option>
-                                <option value="Other" {% if filter_gender == 'Other' %}selected{% endif %}>Other</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-success w-100">
-                                <i class="bi bi-funnel me-2"></i>Filter
-                            </button>
+                        <div class="mt-3 pt-3" style="border-top:1px solid var(--border);">
+                            <button type="submit" class="btn-ac"><i class="bi bi-person-plus-fill"></i> Create Account</button>
+                            <a href="{{ url_for('admin_users') }}" class="btn-out ms-2">Cancel</a>
                         </div>
                     </form>
                 </div>
-                
-                <!-- Users Table -->
-                <div class="card">
-                    <div class="card-body">
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                            <div class="alert alert-{{ category }} alert-dismissible fade show">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                            {% endfor %}
-                        {% endif %}
-                        {% endwith %}
-                        
-                        {% if users %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Username</th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Gender</th>
-                                        <th>Activity</th>
-                                        <th>Created</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for user in users %}
-                                    <tr>
-                                        <td>{{ user[0] }}</td>
-                                        <td><strong>{{ user[1] }}</strong></td>
-                                        <td>{{ user[3] }} {{ user[4] }}</td>
-                                        <td>{{ user[2] }}</td>
-                                        <td>
-                                            <span class="badge bg-{{ 'info' if user[5] == 'Male' else 'warning' }}">
-                                                {{ user[5] }}
-                                            </span>
-                                        </td>
-                                        <td>{{ user[8] }}</td>
-                                        <td>{{ user[9] }}</td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="{{ url_for('admin_view_user', user_id=user[0]) }}" 
-                                                   class="btn btn-info" title="View Details">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                                <a href="{{ url_for('admin_update_user', user_id=user[0]) }}" 
-                                                   class="btn btn-warning" title="Edit">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-danger" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#deleteModal{{ user[0] }}"
-                                                        title="Delete">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                            
-                                            <!-- Delete Confirmation Modal -->
-                                            <div class="modal fade" id="deleteModal{{ user[0] }}" tabindex="-1">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title">Confirm Delete</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            Are you sure you want to delete user <strong>{{ user[1] }}</strong>? This action cannot be undone.
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                            <form method="POST" action="{{ url_for('admin_delete_user', user_id=user[0]) }}" style="display:inline;">
-                                                                <button type="submit" class="btn btn-danger">Delete User</button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% else %}
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i>No users found.
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- View User Details -->
-                {% if view == 'view_user' and user %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-person-circle me-2"></i>User Details
-                    </h1>
-                    <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left me-2"></i>Back to Users
-                    </a>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="bi bi-person me-2"></i>Personal Information</h5>
-                            </div>
-                            <div class="card-body text-center">
-                                <div class="user-avatar mb-3">
-                                    {{ user[3][0] if user[3] else 'U' }}{{ user[4][0] if user[4] else '' }}
-                                </div>
-                                <h4>{{ user[3] }} {{ user[4] }}</h4>
-                                <p class="text-muted">@{{ user[1] }}</p>
-                                <hr>
-                                <div class="text-start">
-                                    <p><i class="bi bi-envelope me-2"></i><strong>Email:</strong> {{ user[2] }}</p>
-                                    <p><i class="bi bi-calendar me-2"></i><strong>DOB:</strong> {{ user[5] if user[5] else 'N/A' }}</p>
-                                    <p><i class="bi bi-gender-ambiguous me-2"></i><strong>Gender:</strong> {{ user[6] }}</p>
-                                    <p>
-                                        <i class="bi bi-shield me-2"></i><strong>Role:</strong> 
-                                        {% if user[10] == 1 %}
-                                            <span class="badge bg-primary">Admin</span>
-                                        {% else %}
-                                            <span class="badge bg-success">User</span>
-                                        {% endif %}
-                                    </p>
-                                    <p><i class="bi bi-clock me-2"></i><strong>Joined:</strong> {{ user[11] }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-8">
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h5><i class="bi bi-heart-pulse me-2"></i>Health Metrics</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <strong>Weight:</strong> {{ user[7] }} kg
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <strong>Height:</strong> {{ user[8] }} cm
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <strong>BMI:</strong> 
-                                        {% if user[7] and user[8] %}
-                                            {{ "%.2f"|format((user[7] / ((user[8]/100) ** 2))) }}
-                                        {% else %}
-                                            N/A
-                                        {% endif %}
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <strong>Activity Level:</strong> {{ user[9] }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h5><i class="bi bi-bullseye me-2"></i>Goals</h5>
-                            </div>
-                            <div class="card-body">
-                                {% if goals %}
-                                    {% for goal in goals %}
-                                    <div class="mb-2 p-2 border rounded">
-                                        <strong>{{ goal[1] }}</strong>: {{ goal[3] }} / {{ goal[2] }}
-                                        <span class="badge bg-{{ 'success' if goal[6] == 'Active' else 'secondary' }} float-end">
-                                            {{ goal[6] }}
-                                        </span>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <p class="text-muted">No goals set</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="bi bi-calendar-check me-2"></i>Recent Logs</h5>
-                            </div>
-                            <div class="card-body">
-                                {% if logs %}
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <thead>
-                                                <tr>
-                                                    <th>Date</th>
-                                                    <th>Calories In</th>
-                                                    <th>Calories Out</th>
-                                                    <th>Water (L)</th>
-                                                    <th>Weight (kg)</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for log in logs %}
-                                                <tr>
-                                                    <td>{{ log[0] }}</td>
-                                                    <td>{{ log[1] }}</td>
-                                                    <td>{{ log[2] }}</td>
-                                                    <td>{{ log[3] }}</td>
-                                                    <td>{{ log[4] }}</td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                {% else %}
-                                    <p class="text-muted">No logs available</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Create User Form -->
-                {% if view == 'create_user' %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-person-plus me-2"></i>Create New User
-                    </h1>
-                    <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left me-2"></i>Back to Users
-                    </a>
-                </div>
-                
-                <div class="row justify-content-center">
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="bi bi-form me-2"></i>User Information</h5>
-                            </div>
-                            <div class="card-body">
-                                {% with messages = get_flashed_messages(with_categories=true) %}
-                                {% if messages %}
-                                    {% for category, message in messages %}
-                                    <div class="alert alert-{{ category }} alert-dismissible fade show">
-                                        {{ message }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                    </div>
-                                    {% endfor %}
-                                {% endif %}
-                                {% endwith %}
-                                
-                                <form method="POST" action="{{ url_for('admin_create_user') }}">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Username *</label>
-                                            <input type="text" class="form-control" name="username" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Email *</label>
-                                            <input type="email" class="form-control" name="email" required>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">First Name *</label>
-                                            <input type="text" class="form-control" name="first_name" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Last Name *</label>
-                                            <input type="text" class="form-control" name="last_name" required>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Password *</label>
-                                            <input type="password" class="form-control" name="password" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Date of Birth</label>
-                                            <input type="date" class="form-control" name="date_of_birth">
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label">Gender</label>
-                                            <select class="form-select" name="gender">
-                                                <option value="Male">Male</option>
-                                                <option value="Female">Female</option>
-                                                <option value="Other">Other</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label">Weight (kg)</label>
-                                            <input type="number" step="0.1" class="form-control" name="weight">
-                                        </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label">Height (cm)</label>
-                                            <input type="number" step="0.1" class="form-control" name="height">
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Activity Level</label>
-                                            <select class="form-select" name="activity_level">
-                                                <option value="Sedentary">Sedentary</option>
-                                                <option value="Light">Light</option>
-                                                <option value="Moderate" selected>Moderate</option>
-                                                <option value="Active">Active</option>
-                                                <option value="Very Active">Very Active</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Role</label>
-                                            <div class="form-check mt-2">
-                                                <input class="form-check-input" type="checkbox" name="is_admin" id="isAdmin">
-                                                <label class="form-check-label" for="isAdmin">
-                                                    Grant Admin Privileges
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save me-2"></i>Create User
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Update User Form -->
-                {% if view == 'update_user' and user %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-pencil me-2"></i>Update User
-                    </h1>
-                    <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left me-2"></i>Back to Users
-                    </a>
-                </div>
-                
-                <div class="row justify-content-center">
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="bi bi-form me-2"></i>Edit User: {{ user[1] }}</h5>
-                            </div>
-                            <div class="card-body">
-                                {% with messages = get_flashed_messages(with_categories=true) %}
-                                {% if messages %}
-                                    {% for category, message in messages %}
-                                    <div class="alert alert-{{ category }} alert-dismissible fade show">
-                                        {{ message }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                    </div>
-                                    {% endfor %}
-                                {% endif %}
-                                {% endwith %}
-                                
-                                <form method="POST" action="{{ url_for('admin_update_user', user_id=user[0]) }}">
-                                    <div class="mb-3">
-                                        <label class="form-label">Username</label>
-                                        <input type="text" class="form-control" value="{{ user[1] }}" disabled>
-                                        <small class="text-muted">Username cannot be changed</small>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Email *</label>
-                                            <input type="email" class="form-control" name="email" value="{{ user[2] }}" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Date of Birth</label>
-                                            <input type="date" class="form-control" name="date_of_birth" value="{{ user[5] }}">
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">First Name *</label>
-                                            <input type="text" class="form-control" name="first_name" value="{{ user[3] }}" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Last Name *</label>
-                                            <input type="text" class="form-control" name="last_name" value="{{ user[4] }}" required>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label">Gender</label>
-                                            <select class="form-select" name="gender">
-                                                <option value="Male" {% if user[6] == 'Male' %}selected{% endif %}>Male</option>
-                                                <option value="Female" {% if user[6] == 'Female' %}selected{% endif %}>Female</option>
-                                                <option value="Other" {% if user[6] == 'Other' %}selected{% endif %}>Other</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label">Weight (kg)</label>
-                                            <input type="number" step="0.1" class="form-control" name="weight" value="{{ user[7] }}">
-                                        </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label">Height (cm)</label>
-                                            <input type="number" step="0.1" class="form-control" name="height" value="{{ user[8] }}">
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Activity Level</label>
-                                            <select class="form-select" name="activity_level">
-                                                <option value="Sedentary" {% if user[9] == 'Sedentary' %}selected{% endif %}>Sedentary</option>
-                                                <option value="Light" {% if user[9] == 'Light' %}selected{% endif %}>Light</option>
-                                                <option value="Moderate" {% if user[9] == 'Moderate' %}selected{% endif %}>Moderate</option>
-                                                <option value="Active" {% if user[9] == 'Active' %}selected{% endif %}>Active</option>
-                                                <option value="Very Active" {% if user[9] == 'Very Active' %}selected{% endif %}>Very Active</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Role</label>
-                                            <div class="form-check mt-2">
-                                                <input class="form-check-input" type="checkbox" name="is_admin" id="isAdmin" {% if user[10] == 1 %}checked{% endif %}>
-                                                <label class="form-check-label" for="isAdmin">
-                                                    Grant Admin Privileges
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <button type="submit" class="btn btn-warning">
-                                        <i class="bi bi-save me-2"></i>Update User
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Daily Logs View -->
-                {% if view == 'daily_logs' %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-calendar-day me-2"></i>Daily Logs
-                    </h1>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>User</th>
-                                        <th>Date</th>
-                                        <th>Calories In</th>
-                                        <th>Calories Burned</th>
-                                        <th>Water (L)</th>
-                                        <th>Sleep (hrs)</th>
-                                        <th>Weight (kg)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if daily_logs %}
-                                    {% for log in daily_logs %}
-                                    <tr>
-                                        <td>{{ log[0] }}</td>
-                                        <td>{{ log[1] }}</td>
-                                        <td>{{ log[2] }}</td>
-                                        <td><span class="text-success">{{ log[3] }}</span></td>
-                                        <td><span class="text-danger">{{ log[4] }}</span></td>
-                                        <td>{{ log[5] }}</td>
-                                        <td>{{ log[6] }}</td>
-                                        <td>{{ log[7] }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="8" class="text-center text-muted">No daily logs found</td>
-                                    </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Meal Logs View -->
-                {% if view == 'meal_logs' %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-cup-straw me-2"></i>Meal Logs
-                    </h1>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>User</th>
-                                        <th>Meal</th>
-                                        <th>Time</th>
-                                        <th>Quantity</th>
-                                        <th>Calories</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if meal_logs %}
-                                    {% for log in meal_logs %}
-                                    <tr>
-                                        <td>{{ log[0] }}</td>
-                                        <td>{{ log[1] }}</td>
-                                        <td><strong>{{ log[2] }}</strong></td>
-                                        <td>{{ log[3] }}</td>
-                                        <td>{{ log[4] }}</td>
-                                        <td><span class="text-success">{{ log[5] }} kcal</span></td>
-                                    </tr>
-                                    {% endfor %}
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted">No meal logs found</td>
-                                    </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Activity Logs View -->
-                {% if view == 'activity_logs' %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-activity me-2"></i>Activity Logs
-                    </h1>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>User</th>
-                                        <th>Activity</th>
-                                        <th>Time</th>
-                                        <th>Duration (min)</th>
-                                        <th>Calories Burned</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if activity_logs %}
-                                    {% for log in activity_logs %}
-                                    <tr>
-                                        <td>{{ log[0] }}</td>
-                                        <td>{{ log[1] }}</td>
-                                        <td><strong>{{ log[2] }}</strong></td>
-                                        <td>{{ log[3] }}</td>
-                                        <td>{{ log[4] }}</td>
-                                        <td><span class="text-danger">{{ log[5] }} kcal</span></td>
-                                    </tr>
-                                    {% endfor %}
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted">No activity logs found</td>
-                                    </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Goals View -->
-                {% if view == 'goals' %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-bullseye me-2"></i>User Goals
-                    </h1>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>User</th>
-                                        <th>Goal Type</th>
-                                        <th>Target</th>
-                                        <th>Current</th>
-                                        <th>Progress</th>
-                                        <th>Start Date</th>
-                                        <th>Target Date</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if goals %}
-                                    {% for goal in goals %}
-                                    <tr>
-                                        <td>{{ goal[0] }}</td>
-                                        <td>{{ goal[1] }}</td>
-                                        <td><span class="badge bg-info">{{ goal[2] }}</span></td>
-                                        <td>{{ goal[3] }}</td>
-                                        <td>{{ goal[4] }}</td>
-                                        <td>
-                                            {% if goal[3] and goal[4] %}
-                                            <div class="progress" style="height: 20px;">
-                                                {% set progress = ((goal[4] / goal[3]) * 100) | int %}
-                                                <div class="progress-bar bg-success" style="width: {{ progress if progress <= 100 else 100 }}%">
-                                                    {{ progress }}%
-                                                </div>
-                                            </div>
-                                            {% else %}
-                                            <span class="text-muted">N/A</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ goal[6] }}</td>
-                                        <td>{{ goal[7] }}</td>
-                                        <td>
-                                            <span class="badge {% if goal[5] == 'Active' %}bg-success{% elif goal[5] == 'Completed' %}bg-primary{% else %}bg-secondary{% endif %}">
-                                                {{ goal[5] }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="9" class="text-center text-muted">No goals found</td>
-                                    </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Add Meal View -->
-                {% if view == 'add_meal' %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-plus-circle me-2"></i>Add New Meal
-                    </h1>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="bi bi-egg-fried me-2"></i>Meal Details</h5>
-                            </div>
-                            <div class="card-body">
-                                <form method="POST" action="{{ url_for('admin_add_meal') }}">
-                                    <div class="mb-3">
-                                        <label class="form-label">Meal Name *</label>
-                                        <input type="text" class="form-control" name="meal_name" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Category *</label>
-                                        <select class="form-select" name="meal_category" required>
-                                            <option value="">Select Category</option>
-                                            <option value="Breakfast">Breakfast</option>
-                                            <option value="Lunch">Lunch</option>
-                                            <option value="Dinner">Dinner</option>
-                                            <option value="Snack">Snack</option>
-                                        </select>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Calories *</label>
-                                            <input type="number" step="0.1" class="form-control" name="calories" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Protein (g)</label>
-                                            <input type="number" step="0.1" class="form-control" name="protein" value="0">
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Carbs (g)</label>
-                                            <input type="number" step="0.1" class="form-control" name="carbs" value="0">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Fats (g)</label>
-                                            <input type="number" step="0.1" class="form-control" name="fats" value="0">
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-plus-circle me-2"></i>Add Meal
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="bi bi-list me-2"></i>Existing Meals</h5>
-                            </div>
-                            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                                {% if meals %}
-                                <table class="table table-sm table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Category</th>
-                                            <th>Calories</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for meal in meals %}
-                                        <tr>
-                                            <td>{{ meal[1] }}</td>
-                                            <td><span class="badge bg-info">{{ meal[2] }}</span></td>
-                                            <td>{{ meal[3] }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                                {% else %}
-                                <p class="text-muted">No meals in database yet</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Add Activity View -->
-                {% if view == 'add_activity' %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-plus-circle me-2"></i>Add New Activity
-                    </h1>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="bi bi-bicycle me-2"></i>Activity Details</h5>
-                            </div>
-                            <div class="card-body">
-                                <form method="POST" action="{{ url_for('admin_add_activity') }}">
-                                    <div class="mb-3">
-                                        <label class="form-label">Activity Name *</label>
-                                        <input type="text" class="form-control" name="activity_name" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Category *</label>
-                                        <select class="form-select" name="activity_category" required>
-                                            <option value="">Select Category</option>
-                                            <option value="Cardio">Cardio</option>
-                                            <option value="Strength">Strength</option>
-                                            <option value="Flexibility">Flexibility</option>
-                                            <option value="Sports">Sports</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Calories per Minute *</label>
-                                        <input type="number" step="0.1" class="form-control" name="calories_per_minute" required>
-                                        <small class="text-muted">Average calories burned per minute of activity</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Intensity Level</label>
-                                        <select class="form-select" name="intensity_level">
-                                            <option value="Low">Low</option>
-                                            <option value="Moderate">Moderate</option>
-                                            <option value="High">High</option>
-                                            <option value="Very High">Very High</option>
-                                        </select>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-plus-circle me-2"></i>Add Activity
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="bi bi-list me-2"></i>Existing Activities</h5>
-                            </div>
-                            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                                {% if activities %}
-                                <table class="table table-sm table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Category</th>
-                                            <th>Cal/Min</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for act in activities %}
-                                        <tr>
-                                            <td>{{ act[1] }}</td>
-                                            <td><span class="badge bg-info">{{ act[2] }}</span></td>
-                                            <td>{{ act[3] }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                                {% else %}
-                                <p class="text-muted">No activities in database yet</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Suggestions View -->
-                {% if view == 'suggestions' %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-lightbulb me-2"></i>AI Suggestions
-                    </h1>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>User</th>
-                                        <th>Type</th>
-                                        <th>Suggestion</th>
-                                        <th>Priority</th>
-                                        <th>Status</th>
-                                        <th>Created</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if suggestions %}
-                                    {% for s in suggestions %}
-                                    <tr>
-                                        <td>{{ s[0] }}</td>
-                                        <td>{{ s[1] }}</td>
-                                        <td><span class="badge bg-info">{{ s[2] }}</span></td>
-                                        <td style="max-width: 300px;">{{ s[3][:100] }}{% if s[3]|length > 100 %}...{% endif %}</td>
-                                        <td>
-                                            <span class="badge {% if s[5] == 'High' %}bg-danger{% elif s[5] == 'Medium' %}bg-warning{% else %}bg-secondary{% endif %}">
-                                                {{ s[5] }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge {% if s[6] == 'Completed' %}bg-success{% elif s[6] == 'Accepted' %}bg-primary{% elif s[6] == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %}">
-                                                {{ s[6] }}
-                                            </span>
-                                        </td>
-                                        <td>{{ s[7] }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted">No suggestions found</td>
-                                    </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Reports View -->
-                {% if view == 'reports' %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-file-earmark-bar-graph me-2"></i>Health Reports
-                    </h1>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>User</th>
-                                        <th>Type</th>
-                                        <th>Period</th>
-                                        <th>Calories In</th>
-                                        <th>Calories Out</th>
-                                        <th>Avg Weight</th>
-                                        <th>Change</th>
-                                        <th>Goals</th>
-                                        <th>Generated</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if reports %}
-                                    {% for r in reports %}
-                                    <tr>
-                                        <td>{{ r[0] }}</td>
-                                        <td>{{ r[1] }}</td>
-                                        <td><span class="badge bg-info">{{ r[2] }}</span></td>
-                                        <td>{{ r[3] }} to {{ r[4] }}</td>
-                                        <td>{{ r[5] }}</td>
-                                        <td>{{ r[6] }}</td>
-                                        <td>{{ r[7] }} kg</td>
-                                        <td>
-                                            {% if r[8] and r[8] > 0 %}
-                                            <span class="text-success">+{{ r[8] }}</span>
-                                            {% elif r[8] and r[8] < 0 %}
-                                            <span class="text-danger">{{ r[8] }}</span>
-                                            {% else %}
-                                            <span class="text-muted">0</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ r[9] }}</td>
-                                        <td>{{ r[11] }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="10" class="text-center text-muted">No reports found</td>
-                                    </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Mood Logs View -->
-                {% if view == 'mood_logs' %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-emoji-smile me-2"></i>Mood Logs
-                    </h1>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>User</th>
-                                        <th>Mood Rating</th>
-                                        <th>Stress Level</th>
-                                        <th>Energy Level</th>
-                                        <th>Notes</th>
-                                        <th>Log Time</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if mood_logs %}
-                                    {% for m in mood_logs %}
-                                    <tr>
-                                        <td>{{ m[0] }}</td>
-                                        <td>{{ m[1] }}</td>
-                                        <td>
-                                            {% for i in range(m[2]) %}
-                                            <i class="bi bi-star-fill text-warning"></i>
-                                            {% endfor %}
-                                            {% for i in range(5 - m[2]) %}
-                                            <i class="bi bi-star text-muted"></i>
-                                            {% endfor %}
-                                        </td>
-                                        <td>
-                                            <span class="badge {% if m[3] == 'Low' %}bg-success{% elif m[3] == 'Moderate' %}bg-warning{% else %}bg-danger{% endif %}">
-                                                {{ m[3] }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge {% if m[4] == 'High' %}bg-success{% elif m[4] == 'Moderate' %}bg-warning{% else %}bg-danger{% endif %}">
-                                                {{ m[4] }}
-                                            </span>
-                                        </td>
-                                        <td style="max-width: 200px;">{{ m[5][:50] if m[5] else '' }}{% if m[5] and m[5]|length > 50 %}...{% endif %}</td>
-                                        <td>{{ m[6] }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted">No mood logs found</td>
-                                    </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Meals Master Table View -->
-                {% if view == 'meals' %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-egg-fried me-2"></i>Meals Database
-                    </h1>
-                    <a href="{{ url_for('admin_add_meal') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i>Add New Meal
-                    </a>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Meal Name</th>
-                                        <th>Category</th>
-                                        <th>Calories</th>
-                                        <th>Protein</th>
-                                        <th>Carbs</th>
-                                        <th>Fats</th>
-                                        <th>Fiber</th>
-                                        <th>Serving</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if meals %}
-                                    {% for meal in meals %}
-                                    <tr>
-                                        <td>{{ meal[0] }}</td>
-                                        <td><strong>{{ meal[1] }}</strong></td>
-                                        <td><span class="badge bg-info">{{ meal[2] }}</span></td>
-                                        <td>{{ meal[3] }} kcal</td>
-                                        <td>{{ meal[4] }}g</td>
-                                        <td>{{ meal[5] }}g</td>
-                                        <td>{{ meal[6] }}g</td>
-                                        <td>{{ meal[7] }}g</td>
-                                        <td>{{ meal[8] }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="9" class="text-center text-muted">No meals found</td>
-                                    </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Activities Master Table View -->
-                {% if view == 'activities' %}
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-bicycle me-2"></i>Activities Database
-                    </h1>
-                    <a href="{{ url_for('admin_add_activity') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i>Add New Activity
-                    </a>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Activity Name</th>
-                                        <th>Category</th>
-                                        <th>Cal/Min</th>
-                                        <th>Intensity</th>
-                                        <th>Description</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if activities %}
-                                    {% for act in activities %}
-                                    <tr>
-                                        <td>{{ act[0] }}</td>
-                                        <td><strong>{{ act[1] }}</strong></td>
-                                        <td><span class="badge bg-info">{{ act[2] }}</span></td>
-                                        <td>{{ act[3] }}</td>
-                                        <td>
-                                            <span class="badge {% if act[4] == 'Low' %}bg-success{% elif act[4] == 'Moderate' %}bg-warning{% elif act[4] == 'High' %}bg-danger{% else %}bg-dark{% endif %}">
-                                                {{ act[4] }}
-                                            </span>
-                                        </td>
-                                        <td style="max-width: 250px;">{{ act[5] }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted">No activities found</td>
-                                    </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-            </main>
+            </div>
         </div>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% endif %}
+
+    <!-- ════════════════ UPDATE USER ═══════════════════════ -->
+    {% if view == 'update_user' and user %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-pencil-square"></i></span> Edit User</h1>
+            <p>Editing account @{{ user[1] }}</p>
+        </div>
+        <a href="{{ url_for('admin_users') }}" class="btn-out"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-9">
+            <div class="acard">
+                <div class="acard-head"><h6><span class="ch-icon ic-amber"><i class="bi bi-pencil-fill"></i></span> Editing: {{ user[1] }}</h6></div>
+                <div class="acard-body" style="padding:1.5rem;">
+                    <form method="POST" action="{{ url_for('admin_update_user', user_id=user[0]) }}">
+                        <div class="fgroup">
+                            <label>Username <span style="font-size:.7rem;color:var(--text-3);">(read-only)</span></label>
+                            <input type="text" class="form-control" value="{{ user[1] }}" disabled>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6"><div class="fgroup"><label>Email <span style="color:var(--danger);">*</span></label><input type="email" class="form-control" name="email" value="{{ user[2] }}" required></div></div>
+                            <div class="col-md-6"><div class="fgroup"><label>Date of Birth</label><input type="date" class="form-control" name="date_of_birth" value="{{ user[5] or '' }}"></div></div>
+                            <div class="col-md-6"><div class="fgroup"><label>First Name <span style="color:var(--danger);">*</span></label><input type="text" class="form-control" name="first_name" value="{{ user[3] }}" required></div></div>
+                            <div class="col-md-6"><div class="fgroup"><label>Last Name <span style="color:var(--danger);">*</span></label><input type="text" class="form-control" name="last_name" value="{{ user[4] }}" required></div></div>
+                            <div class="col-md-4"><div class="fgroup"><label>Gender</label>
+                                <select class="form-select" name="gender">
+                                    <option {% if user[6]=='Male' %}selected{% endif %}>Male</option>
+                                    <option {% if user[6]=='Female' %}selected{% endif %}>Female</option>
+                                    <option {% if user[6]=='Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div></div>
+                            <div class="col-md-4"><div class="fgroup"><label>Weight (kg)</label><input type="number" step="0.1" class="form-control" name="weight" value="{{ user[7] or '' }}"></div></div>
+                            <div class="col-md-4"><div class="fgroup"><label>Height (cm)</label><input type="number" step="0.1" class="form-control" name="height" value="{{ user[8] or '' }}"></div></div>
+                            <div class="col-12"><div class="fgroup"><label>Activity Level</label>
+                                <select class="form-select" name="activity_level">
+                                    <option {% if user[9]=='Sedentary' %}selected{% endif %}>Sedentary</option>
+                                    <option {% if user[9]=='Light' %}selected{% endif %}>Light</option>
+                                    <option {% if user[9]=='Moderate' %}selected{% endif %}>Moderate</option>
+                                    <option {% if user[9]=='Active' %}selected{% endif %}>Active</option>
+                                    <option {% if user[9]=='Very Active' %}selected{% endif %}>Very Active</option>
+                                </select>
+                            </div></div>
+                        </div>
+                        <div class="mt-3 pt-3" style="border-top:1px solid var(--border);">
+                            <button type="submit" class="btn-ac"><i class="bi bi-floppy-fill"></i> Save Changes</button>
+                            <a href="{{ url_for('admin_users') }}" class="btn-out ms-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ DAILY LOGS ════════════════════════ -->
+    {% if view == 'daily_logs' %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-calendar2-week-fill"></i></span> Daily Logs</h1>
+            <p>All user health logs · Latest 200 entries</p>
+        </div>
+    </div>
+    <!-- View Daily Log Modal -->
+    <div class="modal fade" id="viewDailyLogModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-title"><span style="width:26px;height:26px;border-radius:7px;background:var(--info-l);color:var(--info);display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;margin-right:.5rem;"><i class="bi bi-eye"></i></span>Daily Log Details</span>
+                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="viewDailyLogBody"></div>
+                <div class="modal-footer"><button class="btn-out" data-bs-dismiss="modal">Close</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="acard">
+        <div style="overflow-x:auto;">
+            <table class="atable">
+                <thead><tr><th>ID</th><th>User</th><th>Date</th><th>Calories In</th><th>Cal Burned</th><th>Water (L)</th><th>Sleep (h)</th><th>Weight (kg)</th><th style="text-align:right;">Actions</th></tr></thead>
+                <tbody>
+                    {% if daily_logs %}
+                    {% for log in daily_logs %}
+                    <tr>
+                        <td class="col-id">{{ log[0] }}</td>
+                        <td class="col-name">{{ log[1] }}</td>
+                        <td>{{ log[2] }}</td>
+                        <td>
+                            {% set cal = log[3]|int if log[3] else 0 %}
+                            <span class="pill {% if cal > 2500 %}p-red{% elif cal > 1800 %}p-amber{% else %}p-green{% endif %}">{{ cal }} kcal</span>
+                        </td>
+                        <td><span class="pill p-orange">{{ log[4] or 0 }} kcal</span></td>
+                        <td>{{ log[5] or 0 }}</td>
+                        <td>{{ log[6] or 0 }}</td>
+                        <td>{{ log[7] or '—' }}</td>
+                        <td style="text-align:right;">
+                            <div style="display:flex;justify-content:flex-end;gap:.3rem;">
+                                <button class="ico-btn v" title="View"
+                                    onclick="viewDailyLog('{{ log[0] }}','{{ log[1] }}','{{ log[2] }}','{{ log[3] or 0 }}','{{ log[4] or 0 }}','{{ log[5] or 0 }}','{{ log[6] or 0 }}','{{ log[7] or "-" }}')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <form method="POST" action="{{ url_for('admin_delete_daily_log', log_id=log[0]) }}"
+                                      style="display:inline;" onsubmit="return confirm('Delete this daily log entry?')">
+                                    <button type="submit" class="ico-btn d" title="Delete"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr><td colspan="9">
+                        <div class="empty">
+                            <div class="empty-icon"><i class="bi bi-calendar2-x"></i></div>
+                            <h6>No daily logs found</h6>
+                            <p>Health logs will appear here once users begin daily tracking.</p>
+                        </div>
+                    </td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ MEAL LOGS ═════════════════════════ -->
+    {% if view == 'meal_logs' %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-egg-fried"></i></span> Meal Logs</h1>
+            <p>Food entries logged by all users · Latest 200</p>
+        </div>
+    </div>
+    <div class="acard">
+        <div style="overflow-x:auto;">
+            <table class="atable">
+                <thead><tr><th>ID</th><th>User</th><th>Meal</th><th>Date</th><th>Quantity</th><th>Calories</th><th style="text-align:right;">Actions</th></tr></thead>
+                <tbody>
+                    {% if meal_logs %}
+                    {% for log in meal_logs %}
+                    <tr>
+                        <td class="col-id">{{ log[0] }}</td>
+                        <td class="col-name">{{ log[1] }}</td>
+                        <td>{{ log[2] }}</td>
+                        <td>{{ log[3] }}</td>
+                        <td>{{ log[4] }}</td>
+                        <td>
+                            {% set cal = log[5]|int if log[5] else 0 %}
+                            <span class="pill {% if cal > 600 %}p-red{% elif cal > 350 %}p-amber{% else %}p-green{% endif %}">{{ cal }} kcal</span>
+                        </td>
+                        <td style="text-align:right;">
+                            <form method="POST" action="{{ url_for('admin_delete_meal_log', log_id=log[0]) }}"
+                                  style="display:inline;" onsubmit="return confirm('Delete this meal log entry?')">
+                                <button type="submit" class="ico-btn d" title="Delete"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr><td colspan="7">
+                        <div class="empty">
+                            <div class="empty-icon"><i class="bi bi-egg-fried"></i></div>
+                            <h6>No meal logs yet</h6>
+                            <p>Data will appear here once users start logging their meals.</p>
+                        </div>
+                    </td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ ACTIVITY LOGS ═════════════════════ -->
+    {% if view == 'activity_logs' %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-lightning-charge-fill"></i></span> Activity Logs</h1>
+            <p>Exercise entries logged by all users · Latest 200</p>
+        </div>
+    </div>
+    <div class="acard">
+        <div style="overflow-x:auto;">
+            <table class="atable">
+                <thead><tr><th>ID</th><th>User</th><th>Activity</th><th>Date</th><th>Duration (min)</th><th>Cal Burned</th><th style="text-align:right;">Actions</th></tr></thead>
+                <tbody>
+                    {% if activity_logs %}
+                    {% for log in activity_logs %}
+                    <tr>
+                        <td class="col-id">{{ log[0] }}</td>
+                        <td class="col-name">{{ log[1] }}</td>
+                        <td><span class="pill p-orange">{{ log[2] }}</span></td>
+                        <td>{{ log[3] }}</td>
+                        <td>{{ log[4] or 0 }} min</td>
+                        <td><span class="pill p-amber">{{ log[5] or 0 }} kcal</span></td>
+                        <td style="text-align:right;">
+                            <form method="POST" action="{{ url_for('admin_delete_activity_log', log_id=log[0]) }}"
+                                  style="display:inline;" onsubmit="return confirm('Delete this activity log entry?')">
+                                <button type="submit" class="ico-btn d" title="Delete"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr><td colspan="7">
+                        <div class="empty">
+                            <div class="empty-icon"><i class="bi bi-lightning-charge"></i></div>
+                            <h6>No activity logs yet</h6>
+                            <p>Exercise data will appear here once users log their workouts.</p>
+                        </div>
+                    </td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ MOOD LOGS ══════════════════════════ -->
+    {% if view == 'mood_logs' %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-emoji-smile-fill"></i></span> Mood Logs</h1>
+            <p>Wellbeing entries from all users · Latest 200</p>
+        </div>
+    </div>
+    <div class="acard">
+        <div style="overflow-x:auto;">
+            <table class="atable">
+                <thead><tr><th>ID</th><th>User</th><th>Mood Rating</th><th>Stress Level</th><th>Energy Level</th><th>Date</th><th style="text-align:right;">Actions</th></tr></thead>
+                <tbody>
+                    {% if mood_logs %}
+                    {% for m in mood_logs %}
+                    <tr>
+                        <td class="col-id">{{ m[0] }}</td>
+                        <td class="col-name">{{ m[1] }}</td>
+                        <td>
+                            <div style="display:flex;gap:2px;align-items:center;">
+                                {% for i in range(m[2] if m[2] else 0) %}<i class="bi bi-star-fill" style="color:#FBBF24;font-size:.72rem;"></i>{% endfor %}
+                                {% for i in range(5-(m[2] if m[2] else 0)) %}<i class="bi bi-star" style="color:#e2e8f0;font-size:.72rem;"></i>{% endfor %}
+                                <span style="font-size:.7rem;color:var(--text-3);margin-left:.3rem;">({{ m[2] or 0 }}/5)</span>
+                            </div>
+                        </td>
+                        <td><span class="pill {% if m[3]=='Low' %}p-green{% elif m[3]=='Moderate' %}p-amber{% else %}p-red{% endif %}">{{ m[3] or '—' }}</span></td>
+                        <td><span class="pill {% if m[4]=='High' %}p-green{% elif m[4]=='Moderate' %}p-amber{% else %}p-red{% endif %}">{{ m[4] or '—' }}</span></td>
+                        <td>{{ m[6] }}</td>
+                        <td style="text-align:right;">
+                            <form method="POST" action="{{ url_for('admin_delete_mood_log', log_id=m[0]) }}"
+                                  style="display:inline;" onsubmit="return confirm('Delete this mood log entry?')">
+                                <button type="submit" class="ico-btn d" title="Delete"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr><td colspan="7">
+                        <div class="empty">
+                            <div class="empty-icon"><i class="bi bi-emoji-smile"></i></div>
+                            <h6>No mood logs found</h6>
+                            <p>Wellbeing data will appear once users start tracking their mood.</p>
+                        </div>
+                    </td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ GOALS ═════════════════════════════ -->
+    {% if view == 'goals' %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-bullseye"></i></span> User Goals</h1>
+            <p>All health goals across the platform · Latest 200</p>
+        </div>
+    </div>
+    <!-- Goal Status Update Modal -->
+    <div class="modal fade" id="editGoalModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-title"><span style="width:26px;height:26px;border-radius:7px;background:var(--warning-l);color:var(--warning);display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;margin-right:.5rem;"><i class="bi bi-pencil"></i></span>Update Goal Status</span>
+                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editGoalForm" method="POST">
+                    <div class="modal-body">
+                        <div class="fgroup" style="margin-bottom:0;">
+                            <label>New Status</label>
+                            <select class="form-select" name="status" id="goalStatusSelect">
+                                <option value="Active">Active</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Paused">Paused</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-out" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-ac"><i class="bi bi-floppy-fill"></i> Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="acard">
+        <div style="overflow-x:auto;">
+            <table class="atable">
+                <thead><tr><th>ID</th><th>User</th><th>Goal Type</th><th>Target</th><th>Current</th><th>Progress</th><th>Start</th><th>Target Date</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead>
+                <tbody>
+                    {% if goals %}
+                    {% for goal in goals %}
+                    <tr>
+                        <td class="col-id">{{ goal[0] }}</td>
+                        <td class="col-name">{{ goal[1] }}</td>
+                        <td><span class="pill p-blue">{{ goal[2] }}</span></td>
+                        <td>{{ goal[3] }}</td>
+                        <td>{{ goal[4] }}</td>
+                        <td style="min-width:95px;">
+                            {% if goal[3] and goal[4] and goal[3]|float > 0 %}
+                            {% set pct = ((goal[4]|float / goal[3]|float) * 100)|int %}
+                            <div class="prog mb-1"><div class="prog-bar" style="width:{{ [pct,100]|min }}%;background:{% if pct >= 80 %}var(--success){% elif pct >= 40 %}var(--warning){% else %}var(--danger){% endif %};"></div></div>
+                            <span style="font-size:.65rem;color:var(--text-3);">{{ [pct,100]|min }}%</span>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>{{ goal[6] or '—' }}</td>
+                        <td>{{ goal[7] or '—' }}</td>
+                        <td><span class="pill {% if goal[5]=='Active' %}p-green{% elif goal[5]=='Completed' %}p-blue{% else %}p-gray{% endif %}">{{ goal[5] }}</span></td>
+                        <td style="text-align:right;">
+                            <div style="display:flex;justify-content:flex-end;gap:.3rem;">
+                                <button class="ico-btn e" title="Edit Status"
+                                    onclick="openEditGoal('{{ goal[0] }}','{{ goal[5] }}')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <form method="POST" action="{{ url_for('admin_delete_goal', goal_id=goal[0]) }}"
+                                      style="display:inline;" onsubmit="return confirm('Delete this goal?')">
+                                    <button type="submit" class="ico-btn d" title="Delete"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr><td colspan="10">
+                        <div class="empty">
+                            <div class="empty-icon"><i class="bi bi-bullseye"></i></div>
+                            <h6>No goals found</h6>
+                            <p>User health goals will appear here once they start setting targets.</p>
+                        </div>
+                    </td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ MEALS DATABASE ════════════════════ -->
+    {% if view == 'meals' %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-basket3-fill"></i></span> Meals Database</h1>
+            <p>All food items available in the system</p>
+        </div>
+        <a href="{{ url_for('admin_add_meal') }}" class="btn-ac"><i class="bi bi-plus-circle-fill"></i> Add Meal</a>
+    </div>
+    <div class="acard">
+        <div style="overflow-x:auto;">
+            <table class="atable">
+                <thead><tr><th>ID</th><th>Meal Name</th><th>Category</th><th>Calories</th><th>Protein (g)</th><th>Carbs (g)</th><th>Fats (g)</th><th>Fiber (g)</th><th style="text-align:right;">Actions</th></tr></thead>
+                <tbody>
+                    {% if meals %}
+                    {% for meal in meals %}
+                    <tr>
+                        <td class="col-id">{{ meal[0] }}</td>
+                        <td class="col-name">{{ meal[1] }}</td>
+                        <td><span class="pill p-blue">{{ meal[2] }}</span></td>
+                        <td>
+                            {% set cal = meal[3]|int if meal[3] else 0 %}
+                            <span class="pill {% if cal > 600 %}p-red{% elif cal > 300 %}p-amber{% else %}p-green{% endif %}">{{ cal }} kcal</span>
+                        </td>
+                        <td>{{ meal[4] or 0 }}</td>
+                        <td>{{ meal[5] or 0 }}</td>
+                        <td>{{ meal[6] or 0 }}</td>
+                        <td>{{ meal[7] or 0 }}</td>
+                        <td style="text-align:right;">
+                            <div style="display:flex;justify-content:flex-end;gap:.3rem;">
+                                <a href="{{ url_for('admin_edit_meal', meal_id=meal[0]) }}" class="ico-btn e" title="Edit"><i class="bi bi-pencil"></i></a>
+                                <form method="POST" action="{{ url_for('admin_delete_meal', meal_id=meal[0]) }}"
+                                      style="display:inline;" onsubmit="return confirm('Delete meal &quot;{{ meal[1] }}&quot;?')">
+                                    <button type="submit" class="ico-btn d" title="Delete"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr><td colspan="9">
+                        <div class="empty">
+                            <div class="empty-icon"><i class="bi bi-basket3"></i></div>
+                            <h6>No meals in database</h6>
+                            <p>Start building the meals library by adding food items.</p>
+                        </div>
+                    </td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ ACTIVITIES DATABASE ═══════════════ -->
+    {% if view == 'activities' %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-bicycle"></i></span> Activities Database</h1>
+            <p>All exercise types available in the system</p>
+        </div>
+        <a href="{{ url_for('admin_add_activity') }}" class="btn-ac"><i class="bi bi-plus-circle-fill"></i> Add Activity</a>
+    </div>
+    <div class="acard">
+        <div style="overflow-x:auto;">
+            <table class="atable">
+                <thead><tr><th>ID</th><th>Activity Name</th><th>Category</th><th>Cal/Min</th><th>Intensity</th><th>Description</th><th style="text-align:right;">Actions</th></tr></thead>
+                <tbody>
+                    {% if activities %}
+                    {% for act in activities %}
+                    <tr>
+                        <td class="col-id">{{ act[0] }}</td>
+                        <td class="col-name">{{ act[1] }}</td>
+                        <td><span class="pill p-green">{{ act[2] }}</span></td>
+                        <td><strong>{{ act[3] }}</strong> kcal/min</td>
+                        <td><span class="pill {% if act[4]=='Low' %}p-green{% elif act[4]=='Moderate' %}p-amber{% elif act[4] in ('High','Very High') %}p-red{% else %}p-gray{% endif %}">{{ act[4] or 'N/A' }}</span></td>
+                        <td style="color:var(--text-3);max-width:220px;font-size:.78rem;">{{ act[5] }}</td>
+                        <td style="text-align:right;">
+                            <div style="display:flex;justify-content:flex-end;gap:.3rem;">
+                                <a href="{{ url_for('admin_edit_activity', activity_id=act[0]) }}" class="ico-btn e" title="Edit"><i class="bi bi-pencil"></i></a>
+                                <form method="POST" action="{{ url_for('admin_delete_activity', activity_id=act[0]) }}"
+                                      style="display:inline;" onsubmit="return confirm('Delete activity &quot;{{ act[1] }}&quot;?')">
+                                    <button type="submit" class="ico-btn d" title="Delete"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr><td colspan="7">
+                        <div class="empty">
+                            <div class="empty-icon"><i class="bi bi-bicycle"></i></div>
+                            <h6>No activities in database</h6>
+                            <p>Add exercise types to build the activities library.</p>
+                        </div>
+                    </td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ ADD MEAL ══════════════════════════ -->
+    {% if view == 'add_meal' %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-plus-circle-fill"></i></span> Add New Meal</h1>
+            <p>Add a food item to the meals database</p>
+        </div>
+        <a href="{{ url_for('admin_meals') }}" class="btn-out"><i class="bi bi-basket3"></i> View All Meals</a>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="acard">
+                <div class="acard-head"><h6><span class="ch-icon ic-green"><i class="bi bi-egg-fried"></i></span> Meal Details</h6></div>
+                <div class="acard-body" style="padding:1.5rem;">
+                    <form method="POST" action="{{ url_for('admin_add_meal') }}">
+                        <div class="fgroup"><label>Meal Name <span style="color:var(--danger);">*</span></label><input type="text" class="form-control" name="meal_name" required placeholder="e.g. Grilled Chicken Salad"></div>
+                        <div class="fgroup"><label>Category <span style="color:var(--danger);">*</span></label>
+                            <select class="form-select" name="meal_category" required>
+                                <option value="">Select a category</option>
+                                <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option>
+                            </select>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6"><div class="fgroup"><label>Calories (kcal) <span style="color:var(--danger);">*</span></label><input type="number" step="0.1" class="form-control" name="calories" required placeholder="0"></div></div>
+                            <div class="col-6"><div class="fgroup"><label>Protein (g)</label><input type="number" step="0.1" class="form-control" name="protein" value="0"></div></div>
+                            <div class="col-6"><div class="fgroup"><label>Carbohydrates (g)</label><input type="number" step="0.1" class="form-control" name="carbs" value="0"></div></div>
+                            <div class="col-6"><div class="fgroup"><label>Fats (g)</label><input type="number" step="0.1" class="form-control" name="fats" value="0"></div></div>
+                        </div>
+                        <div class="mt-3 pt-3" style="border-top:1px solid var(--border);">
+                            <button type="submit" class="btn-ac"><i class="bi bi-plus-circle-fill"></i> Add Meal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="acard" style="height:100%;">
+                <div class="acard-head"><h6><span class="ch-icon ic-blue"><i class="bi bi-list-ul"></i></span> Recently Added Meals</h6></div>
+                <div style="overflow-y:auto;max-height:400px;">
+                    <table class="atable">
+                        <thead><tr><th>Name</th><th>Category</th><th>Calories</th><th style="text-align:right;">Actions</th></tr></thead>
+                        <tbody>
+                            {% if meals %}{% for meal in meals %}
+                            <tr>
+                                <td class="col-name">{{ meal[1] }}</td>
+                                <td><span class="pill p-blue">{{ meal[2] }}</span></td>
+                                <td>{{ meal[3] }} kcal</td>
+                                <td style="text-align:right;">
+                                    <div style="display:flex;justify-content:flex-end;gap:.3rem;">
+                                        <a href="{{ url_for('admin_edit_meal', meal_id=meal[0]) }}" class="ico-btn e" title="Edit"><i class="bi bi-pencil"></i></a>
+                                        <form method="POST" action="{{ url_for('admin_delete_meal', meal_id=meal[0]) }}"
+                                              style="display:inline;" onsubmit="return confirm('Delete this meal?')">
+                                            <button type="submit" class="ico-btn d" title="Delete"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}{% else %}
+                            <tr><td colspan="4">
+                                <div class="empty" style="padding:1.5rem;">
+                                    <div class="empty-icon" style="width:38px;height:38px;font-size:1rem;"><i class="bi bi-basket3"></i></div>
+                                    <h6 style="font-size:.8rem;">No meals yet</h6>
+                                </div>
+                            </td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ ADD ACTIVITY ══════════════════════ -->
+    {% if view == 'add_activity' %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-plus-circle-fill"></i></span> Add New Activity</h1>
+            <p>Add an exercise type to the activities database</p>
+        </div>
+        <a href="{{ url_for('admin_activities') }}" class="btn-out"><i class="bi bi-bicycle"></i> View All Activities</a>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="acard">
+                <div class="acard-head"><h6><span class="ch-icon ic-amber"><i class="bi bi-bicycle"></i></span> Activity Details</h6></div>
+                <div class="acard-body" style="padding:1.5rem;">
+                    <form method="POST" action="{{ url_for('admin_add_activity') }}">
+                        <div class="fgroup"><label>Activity Name <span style="color:var(--danger);">*</span></label><input type="text" class="form-control" name="activity_name" required placeholder="e.g. Running"></div>
+                        <div class="fgroup"><label>Category <span style="color:var(--danger);">*</span></label>
+                            <select class="form-select" name="activity_category" required>
+                                <option value="">Select a category</option>
+                                <option>Cardio</option><option>Strength</option>
+                                <option>Flexibility</option><option>Sports</option><option>Other</option>
+                            </select>
+                        </div>
+                        <div class="fgroup">
+                            <label>Calories per Minute <span style="color:var(--danger);">*</span></label>
+                            <input type="number" step="0.1" class="form-control" name="calories_per_minute" required placeholder="e.g. 8.5">
+                            <small style="font-size:.7rem;color:var(--text-3);display:block;margin-top:.3rem;">Average calories burned per minute of activity</small>
+                        </div>
+                        <div class="fgroup"><label>Intensity Level</label>
+                            <select class="form-select" name="intensity_level">
+                                <option>Low</option><option selected>Moderate</option><option>High</option><option>Very High</option>
+                            </select>
+                        </div>
+                        <div class="mt-3 pt-3" style="border-top:1px solid var(--border);">
+                            <button type="submit" class="btn-ac"><i class="bi bi-plus-circle-fill"></i> Add Activity</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="acard" style="height:100%;">
+                <div class="acard-head"><h6><span class="ch-icon ic-blue"><i class="bi bi-list-ul"></i></span> Recently Added Activities</h6></div>
+                <div style="overflow-y:auto;max-height:400px;">
+                    <table class="atable">
+                        <thead><tr><th>Name</th><th>Category</th><th>Cal/min</th><th style="text-align:right;">Actions</th></tr></thead>
+                        <tbody>
+                            {% if activities %}{% for act in activities %}
+                            <tr>
+                                <td class="col-name">{{ act[1] }}</td>
+                                <td><span class="pill p-green">{{ act[2] }}</span></td>
+                                <td>{{ act[3] }}</td>
+                                <td style="text-align:right;">
+                                    <div style="display:flex;justify-content:flex-end;gap:.3rem;">
+                                        <a href="{{ url_for('admin_edit_activity', activity_id=act[0]) }}" class="ico-btn e" title="Edit"><i class="bi bi-pencil"></i></a>
+                                        <form method="POST" action="{{ url_for('admin_delete_activity', activity_id=act[0]) }}"
+                                              style="display:inline;" onsubmit="return confirm('Delete this activity?')">
+                                            <button type="submit" class="ico-btn d" title="Delete"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}{% else %}
+                            <tr><td colspan="4">
+                                <div class="empty" style="padding:1.5rem;">
+                                    <div class="empty-icon" style="width:38px;height:38px;font-size:1rem;"><i class="bi bi-bicycle"></i></div>
+                                    <h6 style="font-size:.8rem;">No activities yet</h6>
+                                </div>
+                            </td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ AI SUGGESTIONS ════════════════════ -->
+    {% if view == 'suggestions' %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-stars"></i></span> AI Suggestions</h1>
+            <p>All AI-generated recommendations for users · Latest 200</p>
+        </div>
+    </div>
+    <div class="acard">
+        <div style="overflow-x:auto;">
+            <table class="atable">
+                <thead><tr><th>ID</th><th>User</th><th>Type</th><th>Suggestion</th><th>Context</th><th>Date</th></tr></thead>
+                <tbody>
+                    {% if suggestions %}
+                    {% for s in suggestions %}
+                    <tr>
+                        <td class="col-id">{{ s[0] }}</td>
+                        <td class="col-name">{{ s[1] }}</td>
+                        <td><span class="pill p-purple">{{ s[2] }}</span></td>
+                        <td style="max-width:340px;color:var(--text-2);font-size:.78rem;line-height:1.45;">
+                            {{ (s[3][:120] if s[3] else '') }}{% if s[3] and s[3]|length > 120 %}…{% endif %}
+                        </td>
+                        <td><span class="pill p-gray">{{ s[4] or 'N/A' }}</span></td>
+                        <td>{{ s[7] }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr><td colspan="6">
+                        <div class="empty">
+                            <div class="empty-icon"><i class="bi bi-stars"></i></div>
+                            <h6>No AI suggestions found</h6>
+                            <p>Personalized recommendations will appear here once users receive AI-generated suggestions.</p>
+                        </div>
+                    </td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ REPORTS ════════════════════════════ -->
+    {% if view == 'reports' %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-file-bar-graph-fill"></i></span> AI Reports & Analytics</h1>
+            <p>Platform health analytics and generated user reports</p>
+        </div>
+    </div>
+
+    {% if ai_stats %}
+    <!-- AI Platform Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="sc">
+                <div class="sc-icon ic-purple"><i class="bi bi-stars"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">AI Suggestions</div>
+                    <div class="sc-value">{{ ai_stats.total_suggestions }}</div>
+                    <div class="sc-sub">Total generated</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="sc">
+                <div class="sc-icon ic-teal"><i class="bi bi-bullseye"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">Active Goals</div>
+                    <div class="sc-value">{{ ai_stats.goals_active }}</div>
+                    <div class="sc-sub">{{ ai_stats.goals_completed }} completed</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="sc">
+                <div class="sc-icon ic-orange"><i class="bi bi-emoji-smile-fill"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">Avg Mood</div>
+                    <div class="sc-value">{{ ai_stats.avg_mood or '—' }}<span style="font-size:.9rem;"> /5</span></div>
+                    <div class="sc-sub">Platform average</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="sc">
+                <div class="sc-icon ic-blue"><i class="bi bi-person-check-fill"></i></div>
+                <div class="sc-body">
+                    <div class="sc-label">Users with Goals</div>
+                    <div class="sc-value">{{ ai_stats.users_with_goals }}</div>
+                    <div class="sc-sub">of {{ ai_stats.total_users }} total</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if ai_stats.top_goal_type and ai_stats.top_goal_type != 'N/A' %}
+    <div class="acard mb-3" style="border-left:3px solid var(--accent);">
+        <div class="acard-body" style="display:flex;align-items:center;gap:1rem;">
+            <div style="width:40px;height:40px;border-radius:10px;background:var(--accent-l);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">
+                <i class="bi bi-trophy-fill"></i>
+            </div>
+            <div>
+                <div style="font-size:.72rem;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;">Most Popular Goal Type</div>
+                <div style="font-size:1.05rem;font-weight:700;color:var(--text);">{{ ai_stats.top_goal_type }}</div>
+            </div>
+            <div class="ms-auto text-end">
+                <div style="font-size:.72rem;color:var(--text-3);">Goal completion rate</div>
+                <div style="font-size:1.1rem;font-weight:700;color:var(--success);">
+                    {% if ai_stats.total_goals > 0 %}
+                    {{ "%.0f"|format((ai_stats.goals_completed / ai_stats.total_goals) * 100) }}%
+                    {% else %}—{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <div class="acard">
+        <div class="acard-head">
+            <h6><span class="ch-icon ic-blue"><i class="bi bi-file-bar-graph-fill"></i></span> Generated Health Reports</h6>
+        </div>
+        <div style="overflow-x:auto;">
+            <table class="atable">
+                <thead><tr><th>ID</th><th>User</th><th>Type</th><th>Period</th><th>Cal In</th><th>Cal Out</th><th>Avg Weight</th><th>Wt Change</th><th>Goals</th><th>Generated</th></tr></thead>
+                <tbody>
+                    {% if reports %}
+                    {% for r in reports %}
+                    <tr>
+                        <td class="col-id">{{ r[0] }}</td>
+                        <td class="col-name">{{ r[1] }}</td>
+                        <td><span class="pill p-blue">{{ r[2] }}</span></td>
+                        <td style="white-space:nowrap;font-size:.75rem;color:var(--text-3);">{{ r[3] }} → {{ r[4] }}</td>
+                        <td>{{ r[5] or '—' }}</td>
+                        <td>{{ r[6] or '—' }}</td>
+                        <td>{{ r[7] or '—' }} kg</td>
+                        <td>
+                            {% if r[8] %}
+                            <span class="pill {% if r[8]|float > 0 %}p-red{% elif r[8]|float < 0 %}p-green{% else %}p-gray{% endif %}">
+                                {% if r[8]|float > 0 %}+{% endif %}{{ r[8] }}
+                            </span>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>{{ r[9] or 0 }}</td>
+                        <td>{{ r[11] }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr><td colspan="10">
+                        <div class="empty">
+                            <div class="empty-icon"><i class="bi bi-file-bar-graph"></i></div>
+                            <h6>No reports generated yet</h6>
+                            <p>Reports are generated automatically when users accumulate enough daily tracking data. Encourage users to log their meals, activities, and daily check-ins consistently.</p>
+                        </div>
+                    </td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ EDIT MEAL ════════════════════════════ -->
+    {% if view == 'edit_meal' and meal %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-pencil-square"></i></span> Edit Meal</h1>
+            <p>Editing: {{ meal[1] }}</p>
+        </div>
+        <a href="{{ url_for('admin_meals') }}" class="btn-out"><i class="bi bi-arrow-left"></i> Back to Meals</a>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="acard">
+                <div class="acard-head"><h6><span class="ch-icon ic-green"><i class="bi bi-egg-fried"></i></span> Meal Details — ID #{{ meal[0] }}</h6></div>
+                <div class="acard-body" style="padding:1.5rem;">
+                    <form method="POST" action="{{ url_for('admin_edit_meal', meal_id=meal[0]) }}">
+                        <div class="row g-3">
+                            <div class="col-md-8"><div class="fgroup"><label>Meal Name <span style="color:var(--danger);">*</span></label><input type="text" class="form-control" name="meal_name" value="{{ meal[1] }}" required></div></div>
+                            <div class="col-md-4"><div class="fgroup"><label>Category <span style="color:var(--danger);">*</span></label>
+                                <select class="form-select" name="meal_category" required>
+                                    {% for cat in ['Breakfast','Lunch','Dinner','Snack'] %}
+                                    <option {% if meal[2]==cat %}selected{% endif %}>{{ cat }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div></div>
+                            <div class="col-6 col-md-3"><div class="fgroup"><label>Calories (kcal)</label><input type="number" step="0.1" class="form-control" name="calories" value="{{ meal[3] or 0 }}"></div></div>
+                            <div class="col-6 col-md-3"><div class="fgroup"><label>Protein (g)</label><input type="number" step="0.1" class="form-control" name="protein" value="{{ meal[4] or 0 }}"></div></div>
+                            <div class="col-6 col-md-3"><div class="fgroup"><label>Carbohydrates (g)</label><input type="number" step="0.1" class="form-control" name="carbs" value="{{ meal[5] or 0 }}"></div></div>
+                            <div class="col-6 col-md-3"><div class="fgroup"><label>Fats (g)</label><input type="number" step="0.1" class="form-control" name="fats" value="{{ meal[6] or 0 }}"></div></div>
+                            <div class="col-md-3"><div class="fgroup"><label>Fiber (g)</label><input type="number" step="0.1" class="form-control" name="fiber" value="{{ meal[7] or 0 }}"></div></div>
+                        </div>
+                        <div class="mt-3 pt-3" style="border-top:1px solid var(--border);">
+                            <button type="submit" class="btn-ac"><i class="bi bi-floppy-fill"></i> Save Changes</button>
+                            <a href="{{ url_for('admin_meals') }}" class="btn-out ms-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════ EDIT ACTIVITY ════════════════════════ -->
+    {% if view == 'edit_activity' and activity %}
+    <div class="pg-head">
+        <div class="pg-head-text">
+            <h1><span class="ph-icon"><i class="bi bi-pencil-square"></i></span> Edit Activity</h1>
+            <p>Editing: {{ activity[1] }}</p>
+        </div>
+        <a href="{{ url_for('admin_activities') }}" class="btn-out"><i class="bi bi-arrow-left"></i> Back to Activities</a>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="acard">
+                <div class="acard-head"><h6><span class="ch-icon ic-amber"><i class="bi bi-bicycle"></i></span> Activity Details — ID #{{ activity[0] }}</h6></div>
+                <div class="acard-body" style="padding:1.5rem;">
+                    <form method="POST" action="{{ url_for('admin_edit_activity', activity_id=activity[0]) }}">
+                        <div class="row g-3">
+                            <div class="col-md-8"><div class="fgroup"><label>Activity Name <span style="color:var(--danger);">*</span></label><input type="text" class="form-control" name="activity_name" value="{{ activity[1] }}" required></div></div>
+                            <div class="col-md-4"><div class="fgroup"><label>Category <span style="color:var(--danger);">*</span></label>
+                                <select class="form-select" name="activity_category" required>
+                                    {% for cat in ['Cardio','Strength','Flexibility','Sports','Other'] %}
+                                    <option {% if activity[2]==cat %}selected{% endif %}>{{ cat }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div></div>
+                            <div class="col-md-4"><div class="fgroup"><label>Calories per Minute</label><input type="number" step="0.1" class="form-control" name="calories_per_minute" value="{{ activity[3] or 0 }}"></div></div>
+                            <div class="col-md-4"><div class="fgroup"><label>Intensity Level</label>
+                                <select class="form-select" name="intensity_level">
+                                    {% for lvl in ['Low','Moderate','High','Very High'] %}
+                                    <option {% if activity[4]==lvl %}selected{% endif %}>{{ lvl }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div></div>
+                            <div class="col-12"><div class="fgroup"><label>Description</label><input type="text" class="form-control" name="description" value="{{ activity[5] or '' }}" placeholder="Optional description"></div></div>
+                        </div>
+                        <div class="mt-3 pt-3" style="border-top:1px solid var(--border);">
+                            <button type="submit" class="btn-ac"><i class="bi bi-floppy-fill"></i> Save Changes</button>
+                            <a href="{{ url_for('admin_activities') }}" class="btn-out ms-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── Sidebar toggle (mobile) ──────────────────────────────
+const sidebar = document.querySelector('.sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+const hamburger = document.getElementById('hamburgerBtn');
+
+function openSidebar() {
+    if (sidebar) sidebar.classList.add('open');
+    if (overlay) overlay.classList.add('show');
+}
+function closeSidebar() {
+    if (sidebar) sidebar.classList.remove('open');
+    if (overlay) overlay.classList.remove('show');
+}
+if (hamburger) hamburger.addEventListener('click', openSidebar);
+if (overlay) overlay.addEventListener('click', closeSidebar);
+document.querySelectorAll('.sb-link').forEach(function(link) {
+    link.addEventListener('click', function() {
+        if (window.innerWidth < 992) closeSidebar();
+    });
+});
+
+// ── Daily Log View Modal ─────────────────────────────────
+function viewDailyLog(id, user, date, calIn, calBurned, water, sleep, weight) {
+    var body = document.getElementById('viewDailyLogBody');
+    if (!body) return;
+    body.innerHTML =
+        '<div class="row g-2">' +
+        '<div class="col-6"><div class="metric-chip"><div class="mc-label">Log ID</div><div class="mc-value">#' + id + '</div></div></div>' +
+        '<div class="col-6"><div class="metric-chip"><div class="mc-label">User</div><div class="mc-value" style="font-size:.85rem;">' + user + '</div></div></div>' +
+        '<div class="col-6"><div class="metric-chip"><div class="mc-label">Date</div><div class="mc-value" style="font-size:.85rem;">' + date + '</div></div></div>' +
+        '<div class="col-6"><div class="metric-chip"><div class="mc-label">Calories In</div><div class="mc-value">' + calIn + '<span class="mc-unit">kcal</span></div></div></div>' +
+        '<div class="col-6"><div class="metric-chip"><div class="mc-label">Cal Burned</div><div class="mc-value">' + calBurned + '<span class="mc-unit">kcal</span></div></div></div>' +
+        '<div class="col-6"><div class="metric-chip"><div class="mc-label">Water</div><div class="mc-value">' + water + '<span class="mc-unit">L</span></div></div></div>' +
+        '<div class="col-6"><div class="metric-chip"><div class="mc-label">Sleep</div><div class="mc-value">' + sleep + '<span class="mc-unit">h</span></div></div></div>' +
+        '<div class="col-6"><div class="metric-chip"><div class="mc-label">Weight</div><div class="mc-value">' + weight + '<span class="mc-unit">kg</span></div></div></div>' +
+        '</div>';
+    var modal = new bootstrap.Modal(document.getElementById('viewDailyLogModal'));
+    modal.show();
+}
+
+// ── Goal Edit Modal ──────────────────────────────────────
+function openEditGoal(goalId, currentStatus) {
+    var form = document.getElementById('editGoalForm');
+    var select = document.getElementById('goalStatusSelect');
+    if (!form || !select) return;
+    form.action = '/admin_update_goal/' + goalId;
+    select.value = currentStatus;
+    var modal = new bootstrap.Modal(document.getElementById('editGoalModal'));
+    modal.show();
+}
+</script>
 </body>
 </html>
