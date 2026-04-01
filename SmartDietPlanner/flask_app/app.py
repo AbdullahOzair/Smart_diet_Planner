@@ -386,42 +386,43 @@ def admin_dashboard():
     if 'user_id' not in session or not session.get('is_admin'):
         flash('Access denied', 'error')
         return redirect(url_for('login'))
-    
-    # Get all statistics
-    total_users = 0
-    total_goals = 0
-    total_meals = 0
-    total_activities = 0
-    total_logs = 0
-    total_meal_logs = 0
-    total_activity_logs = 0
-    total_mood_logs = 0
-    total_suggestions = 0
-    total_reports = 0
-    
-    # Count users
-    result = execute_query("SELECT COUNT(*) FROM USERS")
-    if result:
-        total_users = result[0][0]
 
-    # Count goals
-    result = execute_query("SELECT COUNT(*) FROM GOALS")
-    if result:
-        total_goals = result[0][0]
+    def safe_count(table):
+        r = execute_query(f"SELECT COUNT(*) FROM {table}")
+        return r[0][0] if r else 0
 
-    # Count meals
-    result = execute_query("SELECT COUNT(*) FROM MEALS")
-    if result:
-        total_meals = result[0][0]
+    total_users        = safe_count('USERS')
+    total_goals        = safe_count('GOALS')
+    total_meals        = safe_count('MEALS')
+    total_activities   = safe_count('ACTIVITIES')
+    total_logs         = safe_count('DAILY_LOG')
+    total_meal_logs    = safe_count('MEAL_LOG')
+    total_activity_logs= safe_count('ACTIVITY_LOG')
+    total_mood_logs    = safe_count('MOOD_LOG')
+    total_suggestions  = safe_count('SUGGESTIONS')
+    total_reports      = safe_count('REPORTS')
 
-    # Count activities
-    result = execute_query("SELECT COUNT(*) FROM ACTIVITIES")
-    if result:
-        total_activities = result[0][0]
+    recent_users = execute_query("""
+        SELECT user_id, username, first_name, last_name, email,
+               TO_CHAR(created_at,'YYYY-MM-DD')
+        FROM USERS ORDER BY user_id DESC LIMIT 5
+    """)
+    if recent_users is None:
+        recent_users = execute_query("""
+            SELECT user_id, username, first_name, last_name, email, 'N/A'
+            FROM USERS ORDER BY user_id DESC LIMIT 5
+        """) or []
+    recent_users = recent_users or []
 
     return render_template('admin_dashboard.html',
                            total_users=total_users, total_goals=total_goals,
-                           total_meals=total_meals, total_activities=total_activities)
+                           total_meals=total_meals, total_activities=total_activities,
+                           total_logs=total_logs, total_meal_logs=total_meal_logs,
+                           total_activity_logs=total_activity_logs,
+                           total_mood_logs=total_mood_logs,
+                           total_suggestions=total_suggestions,
+                           total_reports=total_reports,
+                           recent_users=recent_users)
 
 
 
@@ -592,9 +593,43 @@ def user_dashboard():
     # Index 16 = goal type
     profile_list.append(active_goal[0][0] if active_goal else None)
 
+    # Fetch today's meals grouped by category for the Meal Plan section
+    today_meals_raw = execute_query("""
+        SELECT m.meal_name, m.description, m.calories * ml.quantity,
+               m.protein * ml.quantity, m.carbohydrates * ml.quantity,
+               m.fats * ml.quantity, LOWER(COALESCE(m.meal_category, 'snack'))
+        FROM MEAL_LOG ml
+        JOIN MEALS m ON ml.meal_id = m.meal_id
+        JOIN DAILY_LOG dl ON ml.daily_log_id = dl.daily_log_id
+        WHERE dl.user_id = %(u)s AND DATE(dl.log_date) = CURRENT_DATE
+        ORDER BY ml.meal_time
+    """, {'u': user_id})
+
+    today_meals = {'breakfast': [], 'lunch': [], 'dinner': [], 'snacks': []}
+    if today_meals_raw:
+        for row in today_meals_raw:
+            cat = (row[6] or 'snack').lower()
+            if 'breakfast' in cat:
+                key = 'breakfast'
+            elif 'lunch' in cat:
+                key = 'lunch'
+            elif 'dinner' in cat:
+                key = 'dinner'
+            else:
+                key = 'snacks'
+            today_meals[key].append({
+                'name': row[0] or 'Unknown',
+                'description': row[1] or '',
+                'calories': round(float(row[2] or 0), 1),
+                'protein': round(float(row[3] or 0), 1),
+                'carbs': round(float(row[4] or 0), 1),
+                'fats': round(float(row[5] or 0), 1),
+            })
+
     profile = get_user_profile(user_id)
     return render_template('user_dashboard.html', stats=stats, today_tracking=today_tracking,
-                           user_profile=profile_list, health_metrics=health_metrics, profile=profile)
+                           user_profile=profile_list, health_metrics=health_metrics,
+                           profile=profile, today_meals=today_meals)
 
 @app.route('/user/profile')
 def user_profile():
@@ -803,6 +838,18 @@ def user_goals():
             else:
                 g['weekly_target'] = 0
 
+    # Auto-complete goals where progress has reached 100%
+    for g in goals:
+        if g['status'] == 'Active' and g.get('progress', 0) >= 100:
+            execute_query(
+                "UPDATE GOALS SET status = 'Completed' WHERE goal_id = %(gid)s AND user_id = %(u)s",
+                {'gid': g['goal_id'], 'u': user_id}, fetch=False
+            )
+            g['status'] = 'Completed'
+
+    active_goals = [g for g in goals if g['status'] == 'Active']
+    history_goals = [g for g in goals if g['status'] != 'Active']
+
     # Weight history from daily logs (last 10 entries with weight)
     weight_history = execute_query("""
         SELECT TO_CHAR(log_date, 'Mon DD') as dt, weight
@@ -816,6 +863,7 @@ def user_goals():
     if not profile:
         profile = get_user_profile(user_id)
     return render_template('user_dashboard.html', view='goals', goals=goals,
+                           active_goals=active_goals, history_goals=history_goals,
                            daily_calories=daily_calories, current_weight=current_weight,
                            weight_history=weight_history, profile=profile, user_profile=profile)
 
@@ -1749,9 +1797,9 @@ def user_reports():
     if 'user_id' not in session:
         flash('Please login first', 'error')
         return redirect(url_for('login'))
-    
+
     user_id = session['user_id']
-    
+
     query = """
         SELECT report_id, report_type,
                TO_CHAR(report_period_start, 'YYYY-MM-DD') as period_start,
@@ -1760,14 +1808,53 @@ def user_reports():
                average_weight, weight_change, goals_achieved,
                report_summary,
                TO_CHAR(generated_date, 'YYYY-MM-DD HH24:MI') as generated_date
-        FROM REPORTS 
+        FROM REPORTS
         WHERE user_id = %(user_id)s
         ORDER BY generated_date DESC
     """
-    
     reports = execute_query(query, {'user_id': user_id})
+
+    # Pull live summary stats from DAILY_LOG for the stats overview strip
+    stats_query = """
+        SELECT
+            COUNT(*)                                          AS total_logs,
+            ROUND(AVG(total_calories_consumed)::numeric, 0)  AS avg_cal_all,
+            ROUND(AVG(CASE WHEN log_date >= CURRENT_DATE - INTERVAL '7 days'
+                           THEN total_calories_consumed END)::numeric, 0) AS avg_cal_7d,
+            ROUND(AVG(CASE WHEN log_date >= CURRENT_DATE - INTERVAL '30 days'
+                           THEN total_calories_consumed END)::numeric, 0) AS avg_cal_30d,
+            ROUND(AVG(CASE WHEN log_date >= CURRENT_DATE - INTERVAL '7 days'
+                           THEN water_intake END)::numeric, 2)            AS avg_water_7d,
+            ROUND(AVG(CASE WHEN log_date >= CURRENT_DATE - INTERVAL '7 days'
+                           THEN sleep_hours END)::numeric, 1)             AS avg_sleep_7d,
+            MAX(weight)                                       AS latest_weight,
+            MIN(log_date)                                     AS first_log,
+            MAX(log_date)                                     AS last_log,
+            SUM(CASE WHEN log_date >= CURRENT_DATE - INTERVAL '7 days'
+                     THEN total_calories_burned ELSE 0 END)   AS burned_7d
+        FROM DAILY_LOG
+        WHERE user_id = %(user_id)s
+    """
+    stats_row = execute_query(stats_query, {'user_id': user_id})
+    log_stats = {}
+    if stats_row:
+        r = stats_row[0]
+        log_stats = {
+            'total_logs':    r[0] or 0,
+            'avg_cal_all':   r[1] or 0,
+            'avg_cal_7d':    r[2] or 0,
+            'avg_cal_30d':   r[3] or 0,
+            'avg_water_7d':  r[4] or 0,
+            'avg_sleep_7d':  r[5] or 0,
+            'latest_weight': r[6] or 0,
+            'first_log':     str(r[7]) if r[7] else None,
+            'last_log':      str(r[8]) if r[8] else None,
+            'burned_7d':     r[9] or 0,
+        }
+
     profile = get_user_profile(user_id)
-    return render_template('user_dashboard.html', view='reports', reports=reports, profile=profile)
+    return render_template('user_dashboard.html', view='reports', reports=reports,
+                           log_stats=log_stats, profile=profile)
 
 
 # ============================================================================
@@ -1788,13 +1875,14 @@ def api_add_water_glass():
     
     if existing:
         current_water = float(existing[0][1] or 0)
-        new_water = current_water + 1  # 1 glass
+        new_water = round(current_water + 0.25, 2)  # 1 glass = 250ml = 0.25L
         execute_query("UPDATE DAILY_LOG SET water_intake = %(w)s WHERE daily_log_id = %(id)s", {'w': new_water, 'id': existing[0][0]}, fetch=False)
     else:
-        new_water = 1
+        new_water = 0.25
         execute_query("INSERT INTO DAILY_LOG (user_id, log_date, water_intake) VALUES (%(u)s, CURRENT_DATE, %(w)s)", {'u': user_id, 'w': new_water}, fetch=False)
-        
-    return jsonify({'success': True, 'message': 'Water glass added successfully', 'water_glasses': new_water})
+
+    glasses = int(round(new_water / 0.25))
+    return jsonify({'success': True, 'message': 'Water glass added successfully', 'water_glasses': glasses})
 
 @app.route('/api/update-water-goal', methods=['POST'])
 def api_update_water_goal():
@@ -1820,6 +1908,34 @@ def api_update_profile():
 
     if not fields:
         return jsonify({'success': False, 'error': 'No fields provided'}), 400
+
+    # --- Input range validation ---
+    CONTACT_ADMIN = ' For unusual values, please contact admin for support.'
+    if 'weight' in fields:
+        try:
+            w = float(fields['weight'])
+            if w < 20 or w > 300:
+                return jsonify({'success': False, 'error': f'Weight must be between 20 and 300 kg.{CONTACT_ADMIN}'}), 400
+        except (ValueError, TypeError):
+            return jsonify({'success': False, 'error': 'Invalid weight value.'}), 400
+
+    if 'height' in fields:
+        try:
+            h = float(fields['height'])
+            if h < 50 or h > 250:
+                return jsonify({'success': False, 'error': f'Height must be between 50 and 250 cm.{CONTACT_ADMIN}'}), 400
+        except (ValueError, TypeError):
+            return jsonify({'success': False, 'error': 'Invalid height value.'}), 400
+
+    if 'date_of_birth' in fields:
+        try:
+            from datetime import date as _date
+            dob = datetime.strptime(str(fields['date_of_birth']), '%Y-%m-%d').date()
+            age_days = (_date.today() - dob).days
+            if age_days < 365 * 10 or age_days > 365 * 120:
+                return jsonify({'success': False, 'error': f'Age must be between 10 and 120 years.{CONTACT_ADMIN}'}), 400
+        except (ValueError, TypeError):
+            return jsonify({'success': False, 'error': 'Invalid date of birth format (use YYYY-MM-DD).'}), 400
 
     # Whitelist of allowed columns in USERS table
     allowed_columns = {
@@ -1899,30 +2015,62 @@ def ai_recommendation():
     user_id = session['user_id']
     profile = get_user_profile(user_id)
 
+    # Map any of the 9 goal options to the 3 plan categories
+    _goal_to_plan = {
+        'lose_weight': 'weight_loss', 'weight_loss': 'weight_loss',
+        'gain_weight': 'weight_gain', 'build_muscle': 'weight_gain',
+        'weight_gain': 'weight_gain', 'increase_strength': 'weight_gain',
+        'maintain_weight': 'maintain', 'maintain': 'maintain',
+        'improve_fitness': 'maintain', 'improve_endurance': 'maintain',
+        'healthy_lifestyle': 'maintain', 'medical_diet': 'maintain',
+    }
+
     # Determine goal: POST selection > active DB goal > default
     if request.method == 'POST':
-        selected_goal = request.form.get('goal', 'maintain')
+        selected_goal = request.form.get('goal', 'maintain_weight')
     else:
         active_goal_row = execute_query(
             "SELECT goal_type FROM GOALS WHERE user_id=%(u)s AND status='Active' ORDER BY created_date DESC LIMIT 1",
             {'u': user_id}
         )
         if active_goal_row:
-            gt = (active_goal_row[0][0] or '').lower()
-            if 'loss' in gt or 'lose' in gt or 'slim' in gt:
-                selected_goal = 'weight_loss'
-            elif 'gain' in gt or 'muscle' in gt or 'bulk' in gt:
-                selected_goal = 'weight_gain'
+            gt = (active_goal_row[0][0] or '').lower().replace(' ', '_')
+            # Map DB goal_type string to dropdown value
+            if 'lose' in gt or 'loss' in gt:
+                selected_goal = 'lose_weight'
+            elif 'gain_weight' in gt:
+                selected_goal = 'gain_weight'
+            elif 'build' in gt or 'muscle' in gt or 'bulk' in gt:
+                selected_goal = 'build_muscle'
+            elif 'maintain' in gt:
+                selected_goal = 'maintain_weight'
+            elif 'strength' in gt:
+                selected_goal = 'increase_strength'
+            elif 'endurance' in gt:
+                selected_goal = 'improve_endurance'
+            elif 'healthy' in gt or 'lifestyle' in gt:
+                selected_goal = 'healthy_lifestyle'
+            elif 'medical' in gt:
+                selected_goal = 'medical_diet'
             else:
-                selected_goal = 'maintain'
+                selected_goal = 'improve_fitness'
         else:
-            selected_goal = 'maintain'
+            selected_goal = 'maintain_weight'
 
-    ai_plan = generate_ai_plan(profile, user_id, selected_goal)
+    plan_goal = _goal_to_plan.get(selected_goal, 'maintain')
+    ai_plan = generate_ai_plan(profile, user_id, plan_goal)
 
     # Save snapshot to SUGGESTIONS table on every POST (explicit regenerate)
     if request.method == 'POST' and ai_plan:
-        goal_labels = {'weight_loss': 'Lose Weight', 'weight_gain': 'Build Muscle', 'maintain': 'Maintain Fitness'}
+        goal_labels = {
+            'lose_weight': 'Lose Weight', 'gain_weight': 'Gain Weight',
+            'build_muscle': 'Build Muscle', 'maintain_weight': 'Maintain Weight',
+            'improve_fitness': 'Improve Fitness', 'increase_strength': 'Increase Strength',
+            'improve_endurance': 'Improve Endurance', 'healthy_lifestyle': 'Healthy Lifestyle',
+            'medical_diet': 'Medical Diet',
+            # legacy keys
+            'weight_loss': 'Lose Weight', 'weight_gain': 'Build Muscle', 'maintain': 'Maintain Weight',
+        }
         summary = (
             f"Goal: {goal_labels.get(selected_goal,'Maintain')} | "
             f"Calories: {ai_plan['calorie_target']} kcal/day | "
@@ -1968,8 +2116,7 @@ def ai_recommendation_history():
 def ml_recommendation():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    profile = get_user_profile(session['user_id'])
-    return render_template('user_dashboard.html', view='ml_recommendation', profile=profile)
+    return redirect(url_for('ai_recommendation'))
 
 @app.route('/user/user-progress')
 def user_progress():
@@ -2034,67 +2181,536 @@ def user_progress():
                            health_metrics={}, profile=profile)
 
 
+@app.route('/user/help')
+def user_help():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    profile = get_user_profile(session['user_id'])
+    return render_template('user_dashboard.html', view='help', profile=profile)
+
+
 # --- Dummy routes for missing endpoints ---
 
-@app.route('/admin_activities', methods=['GET', 'POST'])
-def admin_activities(): return "Dummy admin_activities"
+def _admin_required():
+    return 'user_id' in session and session.get('is_admin')
 
-@app.route('/admin_delete_user/<int:id>', methods=['GET', 'POST'])
-def admin_delete_user(id): return "Dummy admin_delete_user"
 
-@app.route('/change_password', methods=['GET', 'POST'])
-def change_password(): return "Dummy change_password"
+@app.route('/admin_users')
+def admin_users():
+    if not _admin_required():
+        return redirect(url_for('login'))
+    search_name   = request.args.get('search_name', '')
+    filter_gender = request.args.get('filter_gender', '')
+    users = execute_query("""
+        SELECT user_id, username, email, first_name, last_name, gender,
+               date_of_birth, weight, activity_level,
+               TO_CHAR(created_at,'YYYY-MM-DD')
+        FROM USERS
+        WHERE (%(s)s = '' OR username ILIKE %(sl)s
+               OR first_name ILIKE %(sl)s OR last_name ILIKE %(sl)s)
+          AND (%(g)s = '' OR gender = %(g)s)
+        ORDER BY user_id DESC
+    """, {'s': search_name, 'sl': f'%{search_name}%', 'g': filter_gender})
+    if users is None:
+        users = execute_query("""
+            SELECT user_id, username, email, first_name, last_name, gender,
+                   date_of_birth, weight, activity_level, 'N/A'
+            FROM USERS
+            WHERE (%(s)s = '' OR username ILIKE %(sl)s
+                   OR first_name ILIKE %(sl)s OR last_name ILIKE %(sl)s)
+              AND (%(g)s = '' OR gender = %(g)s)
+            ORDER BY user_id DESC
+        """, {'s': search_name, 'sl': f'%{search_name}%', 'g': filter_gender})
+    users = users or []
+    return render_template('admin_dashboard.html', view='users', users=users,
+                           search_name=search_name, filter_gender=filter_gender)
 
-@app.route('/verify_reset_code', methods=['GET', 'POST'])
-def verify_reset_code(): return "Dummy verify_reset_code"
 
-@app.route('/admin_meal_logs', methods=['GET', 'POST'])
-def admin_meal_logs(): return "Dummy admin_meal_logs"
+@app.route('/admin_view_user/<int:user_id>')
+def admin_view_user(user_id):
+    if not _admin_required():
+        return redirect(url_for('login'))
+    user = execute_query("""
+        SELECT user_id, username, email, first_name, last_name,
+               date_of_birth, gender, weight, height, activity_level,
+               0 AS is_admin, 'N/A' AS joined
+        FROM USERS WHERE user_id = %(id)s
+    """, {'id': user_id})
+    user = user[0] if user else None
+    goals = execute_query("""
+        SELECT goal_id, goal_type, target_value, current_value,
+               start_date, target_date, status
+        FROM GOALS WHERE user_id = %(id)s ORDER BY goal_id DESC
+    """, {'id': user_id}) or []
+    logs = execute_query("""
+        SELECT TO_CHAR(log_date,'YYYY-MM-DD'), total_calories_consumed,
+               total_calories_burned, water_intake, weight
+        FROM DAILY_LOG WHERE user_id = %(id)s
+        ORDER BY log_date DESC LIMIT 10
+    """, {'id': user_id}) or []
+    return render_template('admin_dashboard.html', view='view_user',
+                           user=user, goals=goals, logs=logs)
 
-@app.route('/admin_daily_logs', methods=['GET', 'POST'])
-def admin_daily_logs(): return "Dummy admin_daily_logs"
-
-@app.route('/admin_view_user/<int:id>', methods=['GET', 'POST'])
-def admin_view_user(id): return "Dummy admin_view_user"
-
-@app.route('/admin_update_user/<int:id>', methods=['GET', 'POST'])
-def admin_update_user(id): return "Dummy admin_update_user"
-
-@app.route('/admin_goals', methods=['GET', 'POST'])
-def admin_goals(): return "Dummy admin_goals"
-
-@app.route('/admin_meals', methods=['GET', 'POST'])
-def admin_meals(): return "Dummy admin_meals"
-
-@app.route('/admin_add_activity', methods=['GET', 'POST'])
-def admin_add_activity(): return "Dummy admin_add_activity"
-
-@app.route('/admin_users', methods=['GET', 'POST'])
-def admin_users(): return "Dummy admin_users"
-
-@app.route('/admin_mood_logs', methods=['GET', 'POST'])
-def admin_mood_logs(): return "Dummy admin_mood_logs"
 
 @app.route('/admin_create_user', methods=['GET', 'POST'])
-def admin_create_user(): return "Dummy admin_create_user"
+def admin_create_user():
+    if not _admin_required():
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        username      = request.form.get('username', '').strip()
+        email         = request.form.get('email', '').strip()
+        first_name    = request.form.get('first_name', '').strip()
+        last_name     = request.form.get('last_name', '').strip()
+        password      = request.form.get('password', '').strip()
+        dob           = request.form.get('date_of_birth') or None
+        gender        = request.form.get('gender', 'Male')
+        weight        = request.form.get('weight') or None
+        height        = request.form.get('height') or None
+        activity_level= request.form.get('activity_level', 'Moderate')
+        if not username or not email or not password:
+            flash('Username, email, and password are required.', 'danger')
+            return render_template('admin_dashboard.html', view='create_user')
+        existing = execute_query(
+            "SELECT user_id FROM USERS WHERE username=%(u)s OR email=%(e)s",
+            {'u': username, 'e': email})
+        if existing:
+            flash('Username or email already in use.', 'danger')
+            return render_template('admin_dashboard.html', view='create_user')
+        execute_query("""
+            INSERT INTO USERS (username, email, password_hash, first_name, last_name,
+                               date_of_birth, gender, weight, height, activity_level)
+            VALUES (%(u)s,%(e)s,%(p)s,%(fn)s,%(ln)s,%(dob)s,%(g)s,%(w)s,%(h)s,%(al)s)
+        """, {'u': username, 'e': email, 'p': password, 'fn': first_name,
+              'ln': last_name, 'dob': dob, 'g': gender, 'w': weight,
+              'h': height, 'al': activity_level}, fetch=False)
+        flash(f'User {username} created successfully!', 'success')
+        return redirect(url_for('admin_users'))
+    return render_template('admin_dashboard.html', view='create_user')
 
-@app.route('/admin_activity_logs', methods=['GET', 'POST'])
-def admin_activity_logs(): return "Dummy admin_activity_logs"
 
-@app.route('/forgot_password', methods=['GET', 'POST'])
-def forgot_password(): return "Dummy forgot_password"
+@app.route('/admin_update_user/<int:user_id>', methods=['GET', 'POST'])
+def admin_update_user(user_id):
+    if not _admin_required():
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        execute_query("""
+            UPDATE USERS SET email=%(e)s, first_name=%(fn)s, last_name=%(ln)s,
+                date_of_birth=%(dob)s, gender=%(g)s, weight=%(w)s,
+                height=%(h)s, activity_level=%(al)s
+            WHERE user_id=%(id)s
+        """, {'e':  request.form.get('email','').strip(),
+              'fn': request.form.get('first_name','').strip(),
+              'ln': request.form.get('last_name','').strip(),
+              'dob':request.form.get('date_of_birth') or None,
+              'g':  request.form.get('gender','Male'),
+              'w':  request.form.get('weight') or None,
+              'h':  request.form.get('height') or None,
+              'al': request.form.get('activity_level','Moderate'),
+              'id': user_id}, fetch=False)
+        flash('User updated successfully!', 'success')
+        return redirect(url_for('admin_users'))
+    user = execute_query("""
+        SELECT user_id, username, email, first_name, last_name,
+               date_of_birth, gender, weight, height, activity_level,
+               0, 'N/A'
+        FROM USERS WHERE user_id = %(id)s
+    """, {'id': user_id})
+    user = user[0] if user else None
+    if not user:
+        flash('User not found.', 'danger')
+        return redirect(url_for('admin_users'))
+    return render_template('admin_dashboard.html', view='update_user', user=user)
 
-@app.route('/admin_suggestions', methods=['GET', 'POST'])
-def admin_suggestions(): return "Dummy admin_suggestions"
 
-@app.route('/admin_reports', methods=['GET', 'POST'])
-def admin_reports(): return "Dummy admin_reports"
+@app.route('/admin_delete_user/<int:user_id>', methods=['POST'])
+def admin_delete_user(user_id):
+    if not _admin_required():
+        return redirect(url_for('login'))
+    execute_query("DELETE FROM USERS WHERE user_id = %(id)s",
+                  {'id': user_id}, fetch=False)
+    flash('User deleted successfully.', 'success')
+    return redirect(url_for('admin_users'))
 
-@app.route('/reset_password', methods=['GET', 'POST'])
-def reset_password(): return "Dummy reset_password"
+
+@app.route('/admin_delete_daily_log/<int:log_id>', methods=['POST'])
+def admin_delete_daily_log(log_id):
+    if not _admin_required():
+        return redirect(url_for('login'))
+    execute_query("DELETE FROM DAILY_LOG WHERE daily_log_id = %(id)s",
+                  {'id': log_id}, fetch=False)
+    flash('Daily log deleted.', 'success')
+    return redirect(url_for('admin_daily_logs'))
+
+
+@app.route('/admin_delete_meal_log/<int:log_id>', methods=['POST'])
+def admin_delete_meal_log(log_id):
+    if not _admin_required():
+        return redirect(url_for('login'))
+    execute_query("DELETE FROM MEAL_LOG WHERE meal_log_id = %(id)s",
+                  {'id': log_id}, fetch=False)
+    flash('Meal log deleted.', 'success')
+    return redirect(url_for('admin_meal_logs'))
+
+
+@app.route('/admin_delete_activity_log/<int:log_id>', methods=['POST'])
+def admin_delete_activity_log(log_id):
+    if not _admin_required():
+        return redirect(url_for('login'))
+    execute_query("DELETE FROM ACTIVITY_LOG WHERE activity_log_id = %(id)s",
+                  {'id': log_id}, fetch=False)
+    flash('Activity log deleted.', 'success')
+    return redirect(url_for('admin_activity_logs'))
+
+
+@app.route('/admin_delete_mood_log/<int:log_id>', methods=['POST'])
+def admin_delete_mood_log(log_id):
+    if not _admin_required():
+        return redirect(url_for('login'))
+    execute_query("DELETE FROM MOOD_LOG WHERE mood_log_id = %(id)s",
+                  {'id': log_id}, fetch=False)
+    flash('Mood log deleted.', 'success')
+    return redirect(url_for('admin_mood_logs'))
+
+
+@app.route('/admin_update_goal/<int:goal_id>', methods=['POST'])
+def admin_update_goal(goal_id):
+    if not _admin_required():
+        return redirect(url_for('login'))
+    status = request.form.get('status', 'Active')
+    execute_query("UPDATE GOALS SET status=%(s)s WHERE goal_id=%(id)s",
+                  {'s': status, 'id': goal_id}, fetch=False)
+    flash('Goal status updated.', 'success')
+    return redirect(url_for('admin_goals'))
+
+
+@app.route('/admin_delete_goal/<int:goal_id>', methods=['POST'])
+def admin_delete_goal(goal_id):
+    if not _admin_required():
+        return redirect(url_for('login'))
+    execute_query("DELETE FROM GOALS WHERE goal_id = %(id)s",
+                  {'id': goal_id}, fetch=False)
+    flash('Goal deleted.', 'success')
+    return redirect(url_for('admin_goals'))
+
+
+@app.route('/admin_edit_meal/<int:meal_id>', methods=['GET', 'POST'])
+def admin_edit_meal(meal_id):
+    if not _admin_required():
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        execute_query("""
+            UPDATE MEALS SET meal_name=%(n)s, meal_category=%(c)s,
+                calories=%(cal)s, protein=%(p)s, carbohydrates=%(cb)s,
+                fats=%(f)s, fiber=%(fi)s
+            WHERE meal_id=%(id)s
+        """, {
+            'n':   request.form.get('meal_name', '').strip(),
+            'c':   request.form.get('meal_category', ''),
+            'cal': request.form.get('calories', 0),
+            'p':   request.form.get('protein', 0),
+            'cb':  request.form.get('carbs', 0),
+            'f':   request.form.get('fats', 0),
+            'fi':  request.form.get('fiber', 0),
+            'id':  meal_id
+        }, fetch=False)
+        flash('Meal updated successfully!', 'success')
+        return redirect(url_for('admin_meals'))
+    meal = execute_query(
+        "SELECT meal_id, meal_name, meal_category, calories, protein, carbohydrates, fats, fiber FROM MEALS WHERE meal_id=%(id)s",
+        {'id': meal_id}
+    )
+    meal = meal[0] if meal else None
+    if not meal:
+        flash('Meal not found.', 'danger')
+        return redirect(url_for('admin_meals'))
+    return render_template('admin_dashboard.html', view='edit_meal', meal=meal)
+
+
+@app.route('/admin_delete_meal/<int:meal_id>', methods=['POST'])
+def admin_delete_meal(meal_id):
+    if not _admin_required():
+        return redirect(url_for('login'))
+    execute_query("DELETE FROM MEALS WHERE meal_id=%(id)s", {'id': meal_id}, fetch=False)
+    flash('Meal deleted successfully.', 'success')
+    return redirect(url_for('admin_meals'))
+
+
+@app.route('/admin_edit_activity/<int:activity_id>', methods=['GET', 'POST'])
+def admin_edit_activity(activity_id):
+    if not _admin_required():
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        execute_query("""
+            UPDATE ACTIVITIES SET activity_name=%(n)s, activity_category=%(c)s,
+                calories_per_minute=%(cpm)s, intensity_level=%(i)s,
+                description=%(d)s
+            WHERE activity_id=%(id)s
+        """, {
+            'n':   request.form.get('activity_name', '').strip(),
+            'c':   request.form.get('activity_category', ''),
+            'cpm': request.form.get('calories_per_minute', 0),
+            'i':   request.form.get('intensity_level', 'Moderate'),
+            'd':   request.form.get('description', ''),
+            'id':  activity_id
+        }, fetch=False)
+        flash('Activity updated successfully!', 'success')
+        return redirect(url_for('admin_activities'))
+    activity = execute_query(
+        "SELECT activity_id, activity_name, activity_category, calories_per_minute, intensity_level, COALESCE(description,'') FROM ACTIVITIES WHERE activity_id=%(id)s",
+        {'id': activity_id}
+    )
+    activity = activity[0] if activity else None
+    if not activity:
+        flash('Activity not found.', 'danger')
+        return redirect(url_for('admin_activities'))
+    return render_template('admin_dashboard.html', view='edit_activity', activity=activity)
+
+
+@app.route('/admin_delete_activity/<int:activity_id>', methods=['POST'])
+def admin_delete_activity(activity_id):
+    if not _admin_required():
+        return redirect(url_for('login'))
+    execute_query("DELETE FROM ACTIVITIES WHERE activity_id=%(id)s",
+                  {'id': activity_id}, fetch=False)
+    flash('Activity deleted successfully.', 'success')
+    return redirect(url_for('admin_activities'))
+
+
+@app.route('/admin_daily_logs')
+def admin_daily_logs():
+    if not _admin_required():
+        return redirect(url_for('login'))
+    daily_logs = execute_query("""
+        SELECT dl.daily_log_id, u.username,
+               TO_CHAR(dl.log_date,'YYYY-MM-DD'),
+               dl.total_calories_consumed, dl.total_calories_burned,
+               dl.water_intake, dl.sleep_hours, dl.weight
+        FROM DAILY_LOG dl JOIN USERS u ON dl.user_id = u.user_id
+        ORDER BY dl.log_date DESC LIMIT 200
+    """) or []
+    return render_template('admin_dashboard.html',
+                           view='daily_logs', daily_logs=daily_logs)
+
+
+@app.route('/admin_meal_logs')
+def admin_meal_logs():
+    if not _admin_required():
+        return redirect(url_for('login'))
+    meal_logs = execute_query("""
+        SELECT ml.meal_log_id, u.username, m.meal_name,
+               TO_CHAR(dl.log_date,'YYYY-MM-DD'),
+               ml.quantity, ml.total_calories
+        FROM MEAL_LOG ml
+        JOIN DAILY_LOG dl ON ml.daily_log_id = dl.daily_log_id
+        JOIN USERS u ON dl.user_id = u.user_id
+        JOIN MEALS m ON ml.meal_id = m.meal_id
+        ORDER BY ml.meal_log_id DESC LIMIT 200
+    """) or []
+    return render_template('admin_dashboard.html',
+                           view='meal_logs', meal_logs=meal_logs)
+
+
+@app.route('/admin_activity_logs')
+def admin_activity_logs():
+    if not _admin_required():
+        return redirect(url_for('login'))
+    activity_logs = execute_query("""
+        SELECT al.activity_log_id, u.username, 'Exercise' AS activity_name,
+               TO_CHAR(dl.log_date,'YYYY-MM-DD'),
+               al.duration_minutes, al.calories_burned
+        FROM ACTIVITY_LOG al
+        JOIN DAILY_LOG dl ON al.daily_log_id = dl.daily_log_id
+        JOIN USERS u ON dl.user_id = u.user_id
+        ORDER BY al.activity_log_id DESC LIMIT 200
+    """) or []
+    return render_template('admin_dashboard.html',
+                           view='activity_logs', activity_logs=activity_logs)
+
+
+@app.route('/admin_mood_logs')
+def admin_mood_logs():
+    if not _admin_required():
+        return redirect(url_for('login'))
+    mood_logs = execute_query("""
+        SELECT ml.mood_log_id, u.username, ml.mood_rating,
+               ml.stress_level, ml.energy_level,
+               '' AS notes, TO_CHAR(dl.log_date,'YYYY-MM-DD')
+        FROM MOOD_LOG ml
+        JOIN DAILY_LOG dl ON ml.daily_log_id = dl.daily_log_id
+        JOIN USERS u ON dl.user_id = u.user_id
+        ORDER BY ml.mood_log_id DESC LIMIT 200
+    """) or []
+    return render_template('admin_dashboard.html',
+                           view='mood_logs', mood_logs=mood_logs)
+
+
+@app.route('/admin_goals')
+def admin_goals():
+    if not _admin_required():
+        return redirect(url_for('login'))
+    goals = execute_query("""
+        SELECT g.goal_id, u.username, g.goal_type,
+               g.target_value, g.current_value, g.status,
+               TO_CHAR(g.start_date,'YYYY-MM-DD'),
+               TO_CHAR(g.target_date,'YYYY-MM-DD')
+        FROM GOALS g JOIN USERS u ON g.user_id = u.user_id
+        ORDER BY g.goal_id DESC LIMIT 200
+    """) or []
+    return render_template('admin_dashboard.html', view='goals', goals=goals)
+
+
+@app.route('/admin_meals')
+def admin_meals():
+    if not _admin_required():
+        return redirect(url_for('login'))
+    meals = execute_query("""
+        SELECT meal_id, meal_name, meal_category, calories,
+               protein, carbohydrates, fats, fiber, NULL
+        FROM MEALS ORDER BY meal_name LIMIT 500
+    """) or []
+    return render_template('admin_dashboard.html', view='meals', meals=meals)
+
+
+@app.route('/admin_activities')
+def admin_activities():
+    if not _admin_required():
+        return redirect(url_for('login'))
+    activities = execute_query("""
+        SELECT activity_id, activity_name, activity_category,
+               calories_per_minute, intensity_level,
+               COALESCE(description,'') AS description
+        FROM ACTIVITIES ORDER BY activity_name LIMIT 500
+    """) or []
+    return render_template('admin_dashboard.html',
+                           view='activities', activities=activities)
+
 
 @app.route('/admin_add_meal', methods=['GET', 'POST'])
-def admin_add_meal(): return "Dummy admin_add_meal"
+def admin_add_meal():
+    if not _admin_required():
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        meal_name = request.form.get('meal_name', '').strip()
+        category  = request.form.get('meal_category', '')
+        calories  = request.form.get('calories', 0)
+        protein   = request.form.get('protein', 0)
+        carbs     = request.form.get('carbs', 0)
+        fats      = request.form.get('fats', 0)
+        if not meal_name or not category:
+            flash('Meal name and category are required.', 'danger')
+        else:
+            execute_query("""
+                INSERT INTO MEALS
+                    (meal_name, meal_category, calories, protein, carbohydrates, fats, fiber)
+                VALUES (%(n)s,%(c)s,%(cal)s,%(p)s,%(cb)s,%(f)s,0)
+            """, {'n': meal_name, 'c': category, 'cal': calories,
+                  'p': protein, 'cb': carbs, 'f': fats}, fetch=False)
+            flash(f'Meal "{meal_name}" added successfully!', 'success')
+    meals = execute_query("""
+        SELECT meal_id, meal_name, meal_category, calories
+        FROM MEALS ORDER BY meal_id DESC LIMIT 100
+    """) or []
+    return render_template('admin_dashboard.html', view='add_meal', meals=meals)
+
+
+@app.route('/admin_add_activity', methods=['GET', 'POST'])
+def admin_add_activity():
+    if not _admin_required():
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        activity_name = request.form.get('activity_name', '').strip()
+        category      = request.form.get('activity_category', '')
+        cpm           = request.form.get('calories_per_minute', 0)
+        intensity     = request.form.get('intensity_level', 'Moderate')
+        if not activity_name or not category:
+            flash('Activity name and category are required.', 'danger')
+        else:
+            execute_query("""
+                INSERT INTO ACTIVITIES
+                    (activity_name, activity_category, calories_per_minute, intensity_level)
+                VALUES (%(n)s,%(c)s,%(cpm)s,%(i)s)
+            """, {'n': activity_name, 'c': category,
+                  'cpm': cpm, 'i': intensity}, fetch=False)
+            flash(f'Activity "{activity_name}" added successfully!', 'success')
+    activities = execute_query("""
+        SELECT activity_id, activity_name, activity_category, calories_per_minute
+        FROM ACTIVITIES ORDER BY activity_id DESC LIMIT 100
+    """) or []
+    return render_template('admin_dashboard.html',
+                           view='add_activity', activities=activities)
+
+
+@app.route('/admin_suggestions')
+def admin_suggestions():
+    if not _admin_required():
+        return redirect(url_for('login'))
+    suggestions = execute_query("""
+        SELECT s.suggestion_id, u.username, s.suggestion_type,
+               s.suggestion_text, s.reasoning_type,
+               'N/A', 'Active',
+               TO_CHAR(s.created_date,'YYYY-MM-DD')
+        FROM SUGGESTIONS s JOIN USERS u ON s.user_id = u.user_id
+        ORDER BY s.suggestion_id DESC LIMIT 200
+    """) or []
+    return render_template('admin_dashboard.html',
+                           view='suggestions', suggestions=suggestions)
+
+
+@app.route('/admin_reports')
+def admin_reports():
+    if not _admin_required():
+        return redirect(url_for('login'))
+    reports = execute_query("""
+        SELECT r.report_id, u.username, r.report_type,
+               TO_CHAR(r.report_period_start,'YYYY-MM-DD'),
+               TO_CHAR(r.report_period_end,'YYYY-MM-DD'),
+               r.total_calories_consumed, r.total_calories_burned,
+               r.average_weight, r.weight_change, r.goals_achieved,
+               r.report_summary,
+               TO_CHAR(r.generated_date,'YYYY-MM-DD')
+        FROM REPORTS r JOIN USERS u ON r.user_id = u.user_id
+        ORDER BY r.generated_date DESC LIMIT 200
+    """) or []
+
+    def safe_val(q, p=None):
+        r = execute_query(q, p)
+        return r[0][0] if r and r[0][0] is not None else 0
+
+    ai_stats = {
+        'total_reports':     safe_val("SELECT COUNT(*) FROM REPORTS"),
+        'total_suggestions': safe_val("SELECT COUNT(*) FROM SUGGESTIONS"),
+        'total_goals':       safe_val("SELECT COUNT(*) FROM GOALS"),
+        'goals_completed':   safe_val("SELECT COUNT(*) FROM GOALS WHERE status='Completed'"),
+        'goals_active':      safe_val("SELECT COUNT(*) FROM GOALS WHERE status='Active'"),
+        'avg_mood':          safe_val("SELECT ROUND(AVG(mood_rating::numeric),1) FROM MOOD_LOG"),
+        'total_users':       safe_val("SELECT COUNT(*) FROM USERS"),
+        'users_with_goals':  safe_val("SELECT COUNT(DISTINCT user_id) FROM GOALS"),
+    }
+    top_goal = execute_query(
+        "SELECT goal_type, COUNT(*) AS cnt FROM GOALS GROUP BY goal_type ORDER BY cnt DESC LIMIT 1"
+    )
+    ai_stats['top_goal_type'] = top_goal[0][0] if top_goal else 'N/A'
+
+    return render_template('admin_dashboard.html',
+                           view='reports', reports=reports, ai_stats=ai_stats)
+
+
+# ── Non-admin password reset stubs (kept as redirects) ───────────────────────
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+    return redirect(url_for('login'))
+
+@app.route('/verify_reset_code', methods=['GET', 'POST'])
+def verify_reset_code():
+    return redirect(url_for('login'))
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    return redirect(url_for('login'))
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)

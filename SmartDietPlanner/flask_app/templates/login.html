@@ -22,13 +22,25 @@
             <div class="login-body">
                 {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
+                <div class="toast-wrapper" id="sdpToasts">
                     {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        <i class="bi bi-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }} me-2"></i>
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    {% set c = 'error' if category in ('error','danger') else category %}
+                    {% set icon = 'check-circle-fill' if c == 'success' else ('x-circle-fill' if c == 'error' else ('exclamation-triangle-fill' if c == 'warning' else 'info-circle-fill')) %}
+                    {% set label = 'Success' if c == 'success' else ('Error' if c == 'error' else ('Warning' if c == 'warning' else 'Notice')) %}
+                    <div class="toast-msg toast-{{ c }}">
+                        <div class="toast-icon"><i class="bi bi-{{ icon }}"></i></div>
+                        <div style="flex:1;min-width:0;">
+                            <span class="toast-cat">{{ label }}</span>
+                            <span class="toast-text">{{ message }}</span>
+                        </div>
+                        <button class="toast-close" onclick="sdpDismiss(this.closest('.toast-msg'))"><i class="bi bi-x-lg"></i></button>
                     </div>
                     {% endfor %}
+                </div>
+                <script>
+                function sdpDismiss(el){el.classList.add('sdp-dismissing');setTimeout(function(){el.remove();},360);}
+                document.querySelectorAll('.toast-msg').forEach(function(t,i){setTimeout(function(){sdpDismiss(t);},4500+i*600);});
+                </script>
                 {% endif %}
                 {% endwith %}
                 
